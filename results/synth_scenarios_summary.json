@@ -1,0 +1,12 @@
+{
+  "n_scenarios": 4000,
+  "rng_seed": 20260818,
+  "overall_accuracy": 0.9075,
+  "accuracy_when_universal": 1.0,
+  "accuracy_when_confounded": 0.8100616016427105,
+  "bootstrap_a_stable_when_universal": 1.0,
+  "bootstrap_a_stable_when_confounded": 0.7109856262833676,
+  "bootstrap_n_boot_per_scenario": 200,
+  "bootstrap_method": "facility-level resampling with replacement, percentile 95% CI on the Reynolds-like exponent (2nd OLS coefficient)",
+  "ground_truth_law": "log(Cp) = 2.0 - 0.45*log(Re) + 0.30*log(Pg) (+ per-facility deviation if confounded)"
+}

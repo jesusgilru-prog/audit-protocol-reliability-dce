@@ -1,0 +1,230 @@
+\documentclass[journal=dce]{CUP-JNL-DTM}%
+
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage[numbers]{natbib}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\usepackage[colorlinks,allcolors=blue]{hyperref}
+
+\jpub{CAMBRIDGE UNIVERSITY PRESS}
+\jname{DATA-CENTRIC ENGINEERING}
+\articletype{RESEARCH ARTICLE}
+\jyear{2026}
+\jvol{0}
+\jissue{0}
+\eissn{2632-6736}
+% \jdoi intentionally omitted: no DOI has been assigned to this manuscript yet.
+
+\begin{document}
+
+\begin{Frontmatter}
+
+\title[Cross-Domain Audit Protocol Reliability]{When Does a Cross-Domain Audit Protocol Actually Detect Universality? A Synthetic-Data Study of Scaling-Law Discovery Under Domain Confounding}
+
+\author[1]{Jes\'us Gil Ruiz}
+
+\authormark{Gil Ruiz}
+
+\address[1]{\orgdiv{Science and Aerospace Department}, \orgname{Universidad Europea de Madrid}, \orgaddress{\city{Villaviciosa de Od\'on}, \country{Spain}}. \email{jesus.gil@universidadeuropea.es}}
+
+\keywords{domain generalization, scaling-law discovery, leave-one-group-out cross-validation, bootstrap, synthetic benchmarking, model misspecification}
+
+\abstract{Leave-one-group-out (here, leave-one-facility-out, LOFO) cross-validation paired with bootstrap resampling is a protocol for auditing whether a data-driven scaling law generalizes across experimental sources or is an artifact of a single facility. Two companion manuscripts in this series \citep{gilruiz2026paper1,gilruiz2026paper2} applied this protocol to a real 114-point windage (rotor-stator disc friction) dataset spanning four independent facilities and found that an apparently good in-sample fit collapses under LOFO, and that an exhaustive sweep of classical and modern machine-learning models fails to recover a model that generalizes. That negative result raises a question a single small dataset cannot answer: is the audit protocol reliable at that scale? We answer this with a large synthetic study under known ground truth and four confounding mechanisms, adding real bootstrap resampling to match the companion manuscripts' methodology. The protocol is reliable against parameter drift and heavy-tailed noise ($\sim$80\% correct verdicts when truly confounded), but has a severe, quantified blind spot: only 7.8\% of genuinely nonlinear-misspecified scenarios and 39.9\% of genuinely clustered (partially universal) scenarios are correctly flagged as non-generalizing. A meta-model trained on the synthetic scenarios -- using only quantities a practitioner can compute from their own data, not the unobservable generator parameters -- predicts verdict reliability from observable statistics and the protocol's own observed output (96.9\% accuracy, AUC 0.942, in the Gaussian-drift pass; 89.6\%, AUC 0.916, in the more general four-mechanism pass), and, applied to the real windage case's observed verdict, is consistent with (without independently confirming) the companion manuscripts' negative finding not being a small-sample artifact.}
+
+\end{Frontmatter}
+
+\section*{Impact Statement}
+\noindent Scientists increasingly use cross-validation-style audits --- train on some experimental sources, test on the ones withheld --- to decide whether a data-driven pattern is a real, transferable law or an artifact of one facility. This is treated as reliable by construction, but its own reliability had never been tested against known ground truth. We show, with a controlled synthetic study, that this class of audit is trustworthy against simple noise and facility-to-facility parameter drift, but can be nearly blind to two realistic failure modes: a facility-specific nonlinear effect the fitted model cannot represent, and structure shared by only some facilities rather than all of them. Anyone applying this style of audit --- in engineering, physics, or any field pooling data across instruments or sites --- should know which regime applies before trusting a verdict. We provide a meta-model that estimates, from properties of the data collection and the protocol's own observed output, how much a given verdict should be trusted, and apply it to a real case reported in a companion manuscript.
+
+\section{Introduction}
+
+A growing family of methods audits data-driven scientific discovery by asking not only ``does this model fit the data'' but ``does the discovered structure survive when an entire data source is withheld.'' The rationale is that a regression model fit across data pooled from multiple experimental facilities can achieve a high in-sample R\textsuperscript{2} purely by absorbing facility-specific offsets, without the fitted exponents or coefficients corresponding to anything transferable. Leave-one-group-out cross-validation, often paired with bootstrap resampling to obtain confidence intervals on the surviving structure, is a standard tool for detecting this failure mode \citep{kohavi1995,efron1979}.
+
+The first two manuscripts in this series \citep{gilruiz2026paper1,gilruiz2026paper2} apply this audit protocol to windage (aerodynamic friction) in rotor-stator disc cavities, a problem with a long history of facility-specific correlations that do not transfer well \citep{bayley1969,daily1960}. Using a 114-point dataset assembled from four independent facilities \citep{guo2024,vrancik1968,liu2024,zheng2024}, the second companion manuscript \citep{gilruiz2026paper2} finds that a four-predictor power law with a high in-sample fit collapses under leave-one-facility-out cross-validation (pooled LOFO R\textsuperscript{2} of $-0.885$), and only the Reynolds-number exponent survives bootstrap resampling across facilities. A subsequent exhaustive sweep of both classical statistical models and modern ML architectures --- hierarchical Bayesian regression with a physics-informed prior, Gaussian processes, LLM-guided symbolic regression over several candidate functional forms, a transformer-guided symbolic regression proxy, domain-adversarial neural networks, deep kernel Gaussian processes, model-agnostic meta-learning, among others --- was run on the same 114 points. None recovers a model that generalizes; several perform \emph{worse} than the simple linear baseline.
+
+That negative result is scientifically informative, but it leaves an important methodological question unanswered, and unanswerable from a single real dataset: with only four facilities and facility sizes as small as eight points, is the LOFO+bootstrap protocol itself trustworthy at that scale? A negative verdict is only informative if the protocol reliably distinguishes genuine non-generalization from noise-driven false negatives caused by having too little data. Answering this requires known ground truth, which only synthetic data can provide.
+
+This paper studies the audit protocol itself, rather than analyzing the real windage dataset further --- which the second companion manuscript already treats exhaustively. Under what combinations of number of domains ($K$), points per domain ($n$), noise level, and type and strength of confounding does a LOFO+bootstrap protocol correctly tell a genuinely universal law apart from a facility-specific artifact? We generate thousands of synthetic multi-facility datasets with declared, known ground truth, run the same class of audit protocol used in the companion manuscripts (LOFO \emph{and} facility-level bootstrap, both implemented and reported here), and train a machine-learning meta-model over the resulting scenarios to predict protocol reliability from statistics a practitioner can compute from their own data plus the protocol's own observed verdict, not the unobservable generator parameters that determined the synthetic ground truth. We then evaluate that meta-model using the real windage case's own \emph{observed} LOFO verdict as an external check, citing only figures already reported in the companion manuscript, without re-analyzing its raw data.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+  \item A synthetic benchmark (4,000 scenarios under Gaussian parameter drift, plus a second pass of 8,000 scenarios spanning four confounding mechanisms crossed with equal/unequal facility sizes) for evaluating cross-domain scaling-law audit protocols, with both LOFO cross-validation and facility-level bootstrap implemented, matching the companion studies' own methodology.
+  \item A quantified characterization of when this protocol succeeds and fails: robust to parameter drift and heavy noise, but with a severe blind spot against nonlinear misspecification and against clustered/partial universality.
+  \item A meta-model that predicts verdict reliability from statistics computable from real data and the protocol's own observed output --- deliberately excluding both the unobservable ground-truth label and the synthetic generator's latent noise/heterogeneity settings, which earlier drafts of this study mistakenly included (see Limitations) --- applied to the real windage case's observed verdict as an external check.
+\end{enumerate}
+
+\section{Related Work}
+
+\paragraph{Domain generalization and cross-facility audit.}
+The LOFO-style protocol used here and in the companion manuscripts \citep{gilruiz2026paper1,gilruiz2026paper2} is a special case of leave-one-group-out validation for detecting group-specific confounding. Causal transportability \citep{pearl2011transportability} offers a formal framework for reasoning about which mechanisms transfer across domains but has seen limited application to engineering scaling-law discovery. Hierarchical Bayesian and multi-group Gaussian process models \citep{li2025multigroup} are designed to separate shared from group-specific structure with few, heterogeneous groups, but the second companion manuscript's \citep{gilruiz2026paper2} empirical application of exactly this class of model to the real windage data did not recover a generalizing structure, motivating the present study of when such methods can be expected to work at all.
+
+\paragraph{Machine learning for scaling-law and equation discovery.}
+Transformer-based symbolic regression, pretrained on large synthetic corpora of equations and used in inference or fine-tuning mode on small real datasets, has advanced rapidly \citep{biggio2021nesymres,kamienny2022,tpsr2023}. Parallel symbolic enumeration \citep{pse2025} demonstrates GPU-scale search for physical laws directly on limited experimental data. LLM-guided hypothesis generation for physical law discovery \citep{hu2024physagent} proposes candidate functional forms informed by domain knowledge rather than blind search, though benchmarks specifically designed to test whether such systems discover genuine structure or recall memorized forms \citep{shojaee2025llmsrbench} show this remains an open problem. None of these methods, by design, addresses whether the \emph{discovered} structure would survive a cross-domain audit; they optimize fit, not transferability, which is precisely what the LOFO+bootstrap protocol targets and what this paper stress-tests.
+
+\paragraph{Deep learning under small-sample tabular regimes.}
+Grinsztajn et al.\ \citep{grinsztajn2022} show that tree-based models continue to outperform deep learning on tabular data even at $\sim$10,000-row scale; with the real windage dataset's 114 rows across four facilities, this rules out training a deep architecture from scratch as a credible improvement, and motivates applying machine learning here to a large \emph{synthetic} scenario space rather than to the small real dataset directly.
+
+\section{Method}
+
+\subsection{Synthetic scenario generator}
+
+Each scenario simulates $K$ facilities, each contributing $n_k$ points of a log-linear scaling law,
+\begin{equation}
+\log C_p = \beta_0^{(k)} + a^{(k)} \log Re + b^{(k)} \log \Pi_g + \varepsilon,
+\qquad \varepsilon \sim \mathcal{N}(0,\sigma^2),
+\end{equation}
+matching the functional form of the winning model in the second companion manuscript \citep{gilruiz2026paper2}. $Re$ and $\Pi_g$ are drawn uniformly in log-space over ranges representative of the real dataset. Ground truth is declared, not inferred: each scenario is generated as either \emph{universal} (identical $\beta_0^{(k)}, a^{(k)}, b^{(k)}$ across all $K$ facilities) or \emph{confounded}, under one of four mechanisms:
+
+\begin{description}
+  \item[Gaussian parameter drift] $(\beta_0^{(k)}, a^{(k)}, b^{(k)})$ drawn independently per facility from a Normal distribution centered on the true values, spread controlled by heterogeneity $h \in [0,3]$.
+  \item[Outlier-contaminated] parameters follow the Gaussian-drift mechanism, but additionally 15\% of points per facility are drawn from a heavy-noise contamination population ($5\sigma$), testing whether the protocol confuses noise with non-generalization.
+  \item[Nonlinear misspecification] the linear coefficients $(\beta_0, a, b)$ are truly universal, but each facility adds an independent quadratic term in $\log Re$ (scaled by $h$) that the fitted log-linear model cannot represent.
+  \item[Clustered] facilities are assigned to one of two latent clusters; the law is identical within a cluster and differs between clusters by $h$, modeling \emph{partial} rather than all-or-nothing universality.
+\end{description}
+
+Facility sizes are either equal or drawn from a log-normal distribution around $n$ (\texttt{n\_mode}=\texttt{unequal}), echoing the real dataset's dispersion (45/41/20/8 points across its four facilities). Design parameters $K\in[2,20]$, $n\in[5,100]$, $\sigma\in[0.05,0.6]$, $h\in[0,3]$ are sampled uniformly at random. A first pass of 4,000 scenarios used only Gaussian parameter drift; a second, independent pass of 8,000 scenarios (2,000 per mechanism) covers all four confounding types crossed with both facility-size modes. The two passes are analyzed separately throughout (Sections~\ref{sec:results-v1} and \ref{sec:results-v2}) and are not pooled into a single meta-model.
+
+\subsection{Audit protocol: LOFO and facility-level bootstrap}
+
+For each scenario we fit a single pooled ordinary-least-squares model in log space on all points, ignoring facility identity, then perform leave-one-facility-out cross-validation: for each held-out facility, we refit on the remaining $K-1$ facilities and predict the held-out points, pooling residuals across all folds to compute an overall LOFO R\textsuperscript{2} in log space --- the same metric used in the companion manuscripts \citep{gilruiz2026paper1,gilruiz2026paper2}. The protocol declares the law ``universal'' if pooled LOFO R\textsuperscript{2} $> 0$; this threshold means the pooled model out-predicts a constant (the pooled mean), the weakest non-trivial bar for generalization. We adopt it to match the companion manuscripts' own criterion, enabling direct comparison with their reported numbers, rather than because it is the most discriminating choice available --- Section~\ref{sec:results-v1} shows a stricter threshold would in fact detect confounding more reliably, at negligible cost to detecting universality.
+
+Separately, we implement facility-level bootstrap: $B=200$ resamples of the $K$ facilities with replacement, refitting the pooled model on each resample and computing a percentile 95\% confidence interval for the Reynolds-like exponent $a$. We report whether this interval excludes zero (the coefficient ``survives'' bootstrap, the same language and criterion the companion manuscripts use) as a second, complementary diagnostic to the LOFO verdict, not folded into a single binary label. A scenario is scored \emph{correct} (for the LOFO verdict) if the declared universality matches ground truth.
+
+\subsection{Meta-model}
+
+We train a gradient-boosting classifier on each pass separately to predict LOFO-verdict correctness from statistics a practitioner running this protocol on their own data can actually compute: the facility count $K$, mean facility size $n$, the protocol's own \emph{observed} verdict (\texttt{protocol\_says\_universal}), and two observable proxies computed directly from the pooled and per-facility fits --- \texttt{obs\_sigma\_hat} (the residual standard deviation of the single pooled fit) and \texttt{obs\_hetero\_hat} (the standard deviation, across facilities, of each facility's \emph{own} individually-fit Reynolds-like coefficient). Neither proxy requires knowing whether the underlying law is truly universal. Two design choices deliberately excluded from an earlier draft of this study are worth stating explicitly, because both were caught only in external review (see Limitations): the ground-truth label itself (unobservable in practice, and tautologically related to the correctness target), and the synthetic generator's latent \texttt{sigma}/\texttt{heterogeneity} settings (which an earlier draft used directly, even though they are generator parameters, not quantities computable from real data). For the second pass, confound type is also included as an optional input, explicitly framed as a ``what-if'' the practitioner may suspect rather than know. A Gaussian process classifier is trained on a subsample as a probabilistic cross-check. Permutation importance quantifies which inputs drive predicted reliability.
+
+\subsection{External check: the real windage case's observed verdict}
+
+We evaluate the trained meta-model at the real windage case's design point ($K=4$, mean $n\approx28.5$), using \texttt{protocol\_says\_universal}=\textsc{False} --- the \emph{observed} fact from the second companion manuscript's reported LOFO result (pooled R\textsuperscript{2}=$-0.885<0$) \citep{gilruiz2026paper2}, not an assumption about the unknown ground truth. Computing \texttt{obs\_sigma\_hat} and \texttt{obs\_hetero\_hat} for the real case would require re-analyzing the companion manuscript's raw data, which this paper deliberately avoids (see Introduction); we instead sweep both over a plausible range spanning this study's own training distribution and report how the predicted reliability varies (Section~\ref{sec:anchor}).
+
+\section{Results}
+\label{sec:results-v1}
+
+\subsection{Overall protocol reliability (first pass, Gaussian drift)}
+
+Across the first-pass 4,000 Gaussian-drift scenarios ($n{=}2052$ truly universal, $n{=}1948$ truly confounded), the LOFO verdict is correct 90.8\% of the time overall: 100.0\% when the ground truth is universal, but 81.0\% when truly confounded. The facility-level bootstrap's Reynolds-exponent confidence interval excludes zero (the coefficient ``survives'') 100.0\% of the time when truly universal and 71.1\% of the time when truly confounded under this mechanism --- close to, but slightly less reliable than, the LOFO verdict itself here, consistent with bootstrap and LOFO testing related but not identical things (coefficient stability vs.\ held-out predictive fit).
+
+\paragraph{Sensitivity of the LOFO$>0$ threshold.} Table~\ref{tab:threshold} recomputes accuracy at alternative thresholds on the same scenarios. Accuracy when truly confounded rises steadily with the threshold (12.8\% at $-0.5$ to 93.3\% at $+0.5$), while accuracy when truly universal stays at or near 100\% throughout (falling to 99.9\% only at the highest thresholds tested). The threshold$=0$ used throughout this paper is conservative in the sense that it is the weakest bar for declaring universality, not in the sense of maximizing detection accuracy: a stricter (higher) threshold would improve detection of genuine confounding at essentially no cost to detecting genuine universality, within the range tested (Table~\ref{tab:threshold}). We keep threshold$=0$ for direct comparability with the companion manuscripts' own reported numbers rather than tuning it for this study's own benefit.
+
+\begin{table}[tbp]
+\centering
+\caption{Sensitivity of LOFO-verdict accuracy to the declaration threshold (first-pass, Gaussian-drift scenarios).}
+\label{tab:threshold}
+\begin{tabular}{cccc}
+\toprule
+Threshold & Overall & When universal & When confounded \\
+\midrule
+$-0.5$ & 0.576 & 1.000 & 0.128 \\
+$-0.2$ & 0.683 & 1.000 & 0.348 \\
+$-0.1$ & 0.830 & 1.000 & 0.651 \\
+$\phantom{-}0.0$ (used) & 0.908 & 1.000 & 0.810 \\
+$\phantom{-}0.1$ & 0.927 & 0.9995 & 0.850 \\
+$\phantom{-}0.3$ & 0.951 & 0.9990 & 0.901 \\
+$\phantom{-}0.5$ & 0.967 & 0.9990 & 0.933 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Confounding mechanism determines reliability more than sample size (second pass)}
+\label{sec:results-v2}
+
+Table~\ref{tab:by-type} and Figure~\ref{fig:accuracy-by-type} report LOFO-verdict accuracy separately for ground-truth-universal and ground-truth-confounded scenarios, by mechanism, from the independent second pass (2,000 scenarios per mechanism). Robustness to Gaussian parameter drift and to outlier contamination is comparable ($\sim$80\% detection when confounded). Nonlinear misspecification is where the protocol fails most severely: only 7.8\% (95\% CI [6.3,9.7]\%) of genuinely misspecified scenarios are correctly flagged as non-generalizing --- 92.2\% of the time, a facility-specific nonlinear effect the fitted linear model cannot represent is misread as evidence of a universal law. Clustered, partial universality is also poorly detected (39.9\%, 95\% CI [36.8,43.0]\%): the protocol mistakes ``some facilities share structure'' for ``all facilities share structure'' 60.1\% of the time.
+
+Notably, the facility-level bootstrap tells a different story for nonlinear misspecification specifically: the Reynolds-exponent confidence interval excludes zero (``survives'') 99.8\% of the time even when truly confounded under this mechanism, versus only 88.6\% for clustered confounding and 69.6--73.0\% for the other two mechanisms (raw figures in \texttt{results/synth\_scenarios\_v2\_summary.json}). This is not a contradiction, but it is not a case where LOFO does its job well either: the true linear coefficients \emph{are} universal under nonlinear misspecification by construction (only the unmodeled quadratic term differs by facility), so bootstrap correctly identifies the linear structure as stable. The unmodeled nonlinearity genuinely does hurt held-out prediction --- but LOFO's R\textsuperscript{2}$>0$ threshold is not sensitive enough to detect that damage 92.2\% of the time; pooled prediction error from the unmodeled term is frequently not large enough to push pooled LOFO R\textsuperscript{2} below zero. LOFO and bootstrap answer different questions --- predictive generalization versus coefficient stability --- and this mechanism is exactly where the two diagnostics can legitimately diverge, with LOFO specifically the less reliable of the two here.
+
+\begin{table}[tbp]
+\centering
+\caption{LOFO-verdict accuracy by confounding mechanism (2,000 scenarios per mechanism, second pass).}
+\label{tab:by-type}
+\begin{tabular}{lcccc}
+\toprule
+Confounding mechanism & Overall & When universal & When confounded & 95\% CI (when confounded) \\
+\midrule
+Gaussian parameter drift    & 0.903 & 1.000 & 0.802 & [0.776, 0.826] \\
+Outlier-contaminated noise  & 0.899 & 0.997 & 0.808 & [0.783, 0.831] \\
+Nonlinear misspecification  & 0.535 & 0.999 & 0.078 & [0.063, 0.097] \\
+Clustered (partial)         & 0.705 & 1.000 & 0.399 & [0.368, 0.430] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig1_accuracy_by_confound_type.png}
+\caption{LOFO-verdict accuracy by confounding mechanism and ground truth. The protocol is reliable against parameter drift and noise, but has severe, quantified blind spots against nonlinear misspecification and clustered/partial universality.}
+\label{fig:accuracy-by-type}
+\end{figure}
+
+Unequal facility sizes (matching the real dataset's dispersion) have a comparatively minor effect on LOFO-verdict accuracy: 75.5\% pooled across mechanisms with equal facility sizes versus 76.6\% with unequal sizes.
+
+\subsection{Meta-model: predicting verdict reliability from observable information}
+
+The gradient-boosting meta-model, trained on fully observable inputs (see Method), achieves 96.9\% test accuracy (AUC 0.942) on the first pass, predicting LOFO-verdict correctness from $K$, $n$, \texttt{obs\_sigma\_hat}, \texttt{obs\_hetero\_hat}, and the protocol's own observed output; a Gaussian process cross-check reaches 97.3\% accuracy (AUC 0.840, lower than the GBM's, indicating less well-calibrated probability estimates despite similar hard-label accuracy). On the second pass, extended with confound type as an optional input, pooled test accuracy is 89.6\% (AUC 0.916) --- per-mechanism accuracy ranges from 85.0\% (nonlinear misspecification and clustered, tied as the hardest to predict) to 96.4\% (Gaussian drift). Permutation importance (Figure~\ref{fig:importance}) shows \texttt{obs\_sigma\_hat} and the protocol's own observed verdict jointly dominate in both passes; \texttt{obs\_hetero\_hat}, raw sample size ($K$, $n$), and confound type contribute comparatively little once those two are accounted for.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig2_permutation_importance.png}
+\caption{Permutation importance of design parameters and the protocol's own observed verdict, for predicting LOFO-verdict correctness.}
+\label{fig:importance}
+\end{figure}
+
+\subsection{Sample size within the ambiguous regime}
+
+Restricting to the heterogeneity band where ground truth is genuinely hard to distinguish (Gaussian-drift mechanism, $h\in[0.5,1.5]$, $n{=}1284$ scenarios), accuracy does \emph{not} improve monotonically with $K$ (Figure~\ref{fig:k-hard}): $K{=}2$--$3$ (97.2\%), $4$--$6$ (98.1\%), $7$--$9$ (96.5\%), and $10$--$12$ (95.0\%) all clear an 80\%, 90\%, and 95\% reliability threshold, but $K{=}13$--$15$ dips to 89.5\% (below the 90\% threshold) before partially recovering to 91.7\% at $K{=}16$--$20$ (above 90\%, still below 95\%) --- the \emph{opposite} of a naive ``more data helps'' intuition, and not a clean monotonic trend in either direction. Every tested $K$ bin, including the smallest, clears the 80\% threshold; none of this argues for needing large $K$, but the specific bins that dip below 90--95\% show raw facility count alone does not cleanly predict reliability within this ambiguous regime either.
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.7\textwidth]{figures/fig3_accuracy_vs_K_hard_band.png}
+\caption{LOFO-verdict accuracy versus number of facilities $K$, restricted to the ambiguous heterogeneity band, Gaussian-drift mechanism.}
+\label{fig:k-hard}
+\end{figure}
+
+\subsection{External check: the real windage case's observed verdict}
+\label{sec:anchor}
+
+Evaluated at the real windage case's design point ($K{=}4$, $n\approx28.5$) using its \emph{observed} LOFO verdict (\texttt{protocol\_says\_universal}=\textsc{False}, from the second companion manuscript's reported pooled LOFO R\textsuperscript{2}=$-0.885$ \citep{gilruiz2026paper2}) and a 25-point grid over plausible \texttt{obs\_sigma\_hat}$\in[0.1,0.5]$ and \texttt{obs\_hetero\_hat}$\in[0.1,1.2]$, the gradient-boosting meta-model estimates the verdict is correct with probability 0.997--1.000 (mean 0.999) across the grid; the Gaussian process cross-check gives a markedly lower, equally stable 0.606--0.613 (mean 0.610). The two models disagree substantially here despite similar test-set accuracy, which we read as a caution against over-interpreting either number precisely --- both agree the verdict is more likely correct than not, neither should be read as a calibrated exact probability for this specific case. This is offered as illustrative, sensitivity-style support, not as independent confirmation of the companion manuscript's finding: the true \texttt{obs\_sigma\_hat}/\texttt{obs\_hetero\_hat} of the real case are not computed here (doing so would require re-analyzing its raw data, out of scope), and the estimate cannot rule out that the real case's confounding is of the nonlinear-misspecification or clustered type, where the underlying LOFO protocol is far less reliable regardless of $K$ (Table~\ref{tab:by-type}). We state this limitation explicitly rather than assume it away.
+
+\section{Discussion}
+
+The headline practical implication is not ``collect more facilities.'' Within the tested range, raw facility count is a weak predictor of audit-protocol reliability once the type and strength of confounding are accounted for. The practical guidance this study supports instead is: \emph{know, or test for, the shape of the suspected confounding before trusting a LOFO verdict.} A LOFO+bootstrap audit that declares ``universal'' should not be read as ruling out facility-specific structure if that structure could plausibly be nonlinear or clustered --- the protocol is nearly blind to both. This has an implication for the second companion manuscript \citep{gilruiz2026paper2}: its finding of \emph{non-generalization} is consistent with the regime where this class of protocol is reliable, but any future work in this series reporting a \emph{positive} generalization result from the same class of protocol should be treated cautiously unless nonlinear and clustered alternatives have been separately ruled out.
+
+\section{Limitations}
+
+The synthetic generator uses a single base functional form (two-predictor log-linear power law) matching the second companion manuscript's winning model \citep{gilruiz2026paper2}; other functional forms, higher-dimensional predictor sets, or non-log-linear ground truths are not explored. Each scenario is a single random draw, not repeated across seeds, so scenario-level accuracy estimates carry sampling noise not fully reflected in the reported point estimates (binomial 95\% confidence intervals are reported in Table~\ref{tab:by-type} for the headline per-mechanism figures; individual cells in finer breakdowns, e.g. $K$ bins in Figure~\ref{fig:k-hard}, are noisier still and not individually interval-estimated). The real-case anchor sweeps both observable proxies over a plausible range rather than computing their true values for the real case, deliberately to avoid re-analyzing the companion manuscript's raw data; this means the anchor is illustrative sensitivity analysis, not a precise recovery, and the two meta-models it uses disagree with each other by a wide margin (Section~\ref{sec:anchor}), which should temper how much weight is placed on it.
+
+Two earlier design choices in this study, both caught only through external review rather than found independently beforehand, are worth stating plainly rather than glossing over. First, an earlier version of the meta-model included the scenario's ground-truth label (\texttt{is\_universal}) as an input feature; because the prediction target is defined as agreement between the protocol's verdict and that same label, this leaked the answer into the model and made the reported accuracy close to tautological, and made the real-case anchor circular. Second, a subsequent version used the generator's latent \texttt{sigma} and \texttt{heterogeneity} settings directly as meta-model inputs, while claiming the model used only information a practitioner has access to --- untrue, since neither is computable from real data. Both are corrected in this version: the meta-model now uses only $K$, $n$, the two observable proxies \texttt{obs\_sigma\_hat}/\texttt{obs\_hetero\_hat}, and the protocol's own observed output, and the real-case anchor uses the case's \emph{observed} verdict rather than an assumed ground truth. We report both corrections here because a reader auditing this line of work should know the meta-model's feature set changed twice for substantive, not cosmetic, reasons.
+
+\section{Conclusion}
+
+We show, via a two-pass synthetic study with both LOFO cross-validation and facility-level bootstrap implemented, that a standard cross-domain audit protocol for scaling-law discovery is reliable against simple parameter drift and heavy noise but has severe, quantified blind spots against nonlinear model misspecification and clustered (partial) universality. A meta-model trained on observable information alone predicts protocol-verdict reliability, and, applied to the real windage case's own observed verdict \citep{gilruiz2026paper1,gilruiz2026paper2}, gives quantitative, though not conclusive, support to the view that its negative generalization finding is not a small-sample artifact. This closes the three-manuscript arc --- audit protocol, real-world application, and a characterization of the protocol's own reliability boundaries --- with a result directly actionable for anyone applying this class of method to a new domain.
+
+\begin{Backmatter}
+
+\paragraph{Acknowledgments}
+Large language model assistance (Claude Sonnet 5 and Claude Opus 5, Anthropic, August 2026) was used for code implementation, literature search and reference verification, synthetic-experiment design, and manuscript drafting. All code was executed and its output inspected by the author; all cited references with a DOI or formal publication record were independently verified against Crossref or publisher metadata (the two unpublished companion manuscripts were checked against their own source files instead, since neither has a public record yet).
+
+\paragraph{Funding Statement}
+No external funding.
+
+\paragraph{Competing Interests}
+The author declares no competing interests.
+
+\paragraph{Data Availability Statement}
+The synthetic scenario generation, audit protocol, and meta-model code, together with all reported summary statistics, are generated with fixed random seeds (reported in each result file) for exact reproducibility. Code and data are available from the corresponding author upon reasonable request.
+
+\paragraph{Ethical Standards}
+This study uses only synthetic data and summary statistics reported in companion manuscripts by the same author; it involves no human or animal subjects and no new experimental data collection.
+
+\paragraph{Author Contributions}
+Conceptualization: J.G.R. Methodology: J.G.R. Software: J.G.R. Data curation: J.G.R. Writing original draft: J.G.R.
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{Backmatter}
+
+\end{document}

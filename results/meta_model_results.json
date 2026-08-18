@@ -1,0 +1,188 @@
+{
+  "gbm": {
+    "test_accuracy": 0.969,
+    "test_auc": 0.9415063247620064,
+    "permutation_importance": {
+      "K": -0.0020000000000000018,
+      "n_per_facility": -0.0017000000000000014,
+      "obs_sigma_hat": 0.255,
+      "obs_hetero_hat": 0.004350000000000004,
+      "protocol_says_universal": 0.2602
+    }
+  },
+  "gp": {
+    "test_accuracy": 0.973,
+    "test_auc": 0.840215290867921,
+    "n_train": 600
+  },
+  "real_windage_case_anchor_sweep": [
+    {
+      "obs_sigma_hat": 0.1,
+      "obs_hetero_hat": 0.1,
+      "gbm_p_correct": 0.9994824958343961,
+      "gp_p_correct": 0.6061580866372367
+    },
+    {
+      "obs_sigma_hat": 0.1,
+      "obs_hetero_hat": 0.3,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.6061655881740649
+    },
+    {
+      "obs_sigma_hat": 0.1,
+      "obs_hetero_hat": 0.5,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.606144402832058
+    },
+    {
+      "obs_sigma_hat": 0.1,
+      "obs_hetero_hat": 0.8,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.6060589702222785
+    },
+    {
+      "obs_sigma_hat": 0.1,
+      "obs_hetero_hat": 1.2,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.6058456505890604
+    },
+    {
+      "obs_sigma_hat": 0.2,
+      "obs_hetero_hat": 0.1,
+      "gbm_p_correct": 0.9994824958343961,
+      "gp_p_correct": 0.6078865084561755
+    },
+    {
+      "obs_sigma_hat": 0.2,
+      "obs_hetero_hat": 0.3,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.6078944653573615
+    },
+    {
+      "obs_sigma_hat": 0.2,
+      "obs_hetero_hat": 0.5,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.6078726695680814
+    },
+    {
+      "obs_sigma_hat": 0.2,
+      "obs_hetero_hat": 0.8,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.6077843298062646
+    },
+    {
+      "obs_sigma_hat": 0.2,
+      "obs_hetero_hat": 1.2,
+      "gbm_p_correct": 0.9996595820349011,
+      "gp_p_correct": 0.6075634594839983
+    },
+    {
+      "obs_sigma_hat": 0.3,
+      "obs_hetero_hat": 0.1,
+      "gbm_p_correct": 0.9989660737160965,
+      "gp_p_correct": 0.6096341348099088
+    },
+    {
+      "obs_sigma_hat": 0.3,
+      "obs_hetero_hat": 0.3,
+      "gbm_p_correct": 0.999319755576039,
+      "gp_p_correct": 0.6096425812063444
+    },
+    {
+      "obs_sigma_hat": 0.3,
+      "obs_hetero_hat": 0.5,
+      "gbm_p_correct": 0.999319755576039,
+      "gp_p_correct": 0.6096201715332654
+    },
+    {
+      "obs_sigma_hat": 0.3,
+      "obs_hetero_hat": 0.8,
+      "gbm_p_correct": 0.999319755576039,
+      "gp_p_correct": 0.6095288493055477
+    },
+    {
+      "obs_sigma_hat": 0.3,
+      "obs_hetero_hat": 1.2,
+      "gbm_p_correct": 0.999319755576039,
+      "gp_p_correct": 0.6093001991527274
+    },
+    {
+      "obs_sigma_hat": 0.4,
+      "obs_hetero_hat": 0.1,
+      "gbm_p_correct": 0.9971316234313176,
+      "gp_p_correct": 0.6114004098008081
+    },
+    {
+      "obs_sigma_hat": 0.4,
+      "obs_hetero_hat": 0.3,
+      "gbm_p_correct": 0.9981116413670188,
+      "gp_p_correct": 0.6114093820812911
+    },
+    {
+      "obs_sigma_hat": 0.4,
+      "obs_hetero_hat": 0.5,
+      "gbm_p_correct": 0.9981116413670188,
+      "gp_p_correct": 0.6113863566036457
+    },
+    {
+      "obs_sigma_hat": 0.4,
+      "obs_hetero_hat": 0.8,
+      "gbm_p_correct": 0.9981116413670188,
+      "gp_p_correct": 0.6112919774791123
+    },
+    {
+      "obs_sigma_hat": 0.4,
+      "obs_hetero_hat": 1.2,
+      "gbm_p_correct": 0.9981116413670188,
+      "gp_p_correct": 0.6110553170105391
+    },
+    {
+      "obs_sigma_hat": 0.5,
+      "obs_hetero_hat": 0.1,
+      "gbm_p_correct": 0.9984991192384535,
+      "gp_p_correct": 0.6131847125780325
+    },
+    {
+      "obs_sigma_hat": 0.5,
+      "obs_hetero_hat": 0.3,
+      "gbm_p_correct": 0.999012377320357,
+      "gp_p_correct": 0.6131942494904763
+    },
+    {
+      "obs_sigma_hat": 0.5,
+      "obs_hetero_hat": 0.5,
+      "gbm_p_correct": 0.999012377320357,
+      "gp_p_correct": 0.6131706079610524
+    },
+    {
+      "obs_sigma_hat": 0.5,
+      "obs_hetero_hat": 0.8,
+      "gbm_p_correct": 0.999012377320357,
+      "gp_p_correct": 0.6130730987320021
+    },
+    {
+      "obs_sigma_hat": 0.5,
+      "obs_hetero_hat": 1.2,
+      "gbm_p_correct": 0.999012377320357,
+      "gp_p_correct": 0.6128281967662303
+    }
+  ],
+  "real_windage_case_anchor_summary": {
+    "gbm_p_correct_min": 0.9971316234313176,
+    "gbm_p_correct_max": 0.9996595820349011,
+    "gbm_p_correct_mean": 0.9990645424555011,
+    "gp_p_correct_min": 0.6058456505890604,
+    "gp_p_correct_max": 0.6131942494904763,
+    "gp_p_correct_mean": 0.6095637750255025
+  },
+  "anchor_note": "obs_sigma_hat and obs_hetero_hat are swept over a plausible range rather than fixed, because computing their real values for the windage case would require re-analyzing the companion study's raw data, which this paper deliberately avoids. protocol_says_universal=False is the OBSERVED verdict (pooled LOFO R2=-0.885<0) from the companion study, not an assumption.",
+  "rng_seed": 20260818,
+  "n_scenarios_total": 4000,
+  "features_used": [
+    "K",
+    "n_per_facility",
+    "obs_sigma_hat",
+    "obs_hetero_hat",
+    "protocol_says_universal"
+  ]
+}
