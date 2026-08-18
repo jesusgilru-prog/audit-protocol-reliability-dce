@@ -16,7 +16,7 @@ plt.rcParams.update({"font.size": 10, "figure.dpi": 150})
 # ---- Figure 1: accuracy by confound type (v2) ----
 df2 = pd.read_csv(os.path.join(RESULTS, "synth_scenarios_v2.csv"))
 types = ["gaussian_linear", "outlier_contaminated", "nonlinear_misspecified", "clustered"]
-labels = ["Gaussian\nparameter drift", "Outlier /\nheavy noise", "Nonlinear\nmisspecification", "Clustered\n(partial universality)"]
+labels = ["Gaussian\nparameter drift", "Drift with\noutlier contamination", "Nonlinear\nmisspecification", "Clustered\n(partial universality)"]
 
 acc_universal = [df2[(df2.confound_type == t) & (df2.is_universal)].correct.mean() for t in types]
 acc_confounded = [df2[(df2.confound_type == t) & (~df2.is_universal)].correct.mean() for t in types]
@@ -37,17 +37,17 @@ fig.tight_layout()
 fig.savefig(os.path.join(FIGS, "fig1_accuracy_by_confound_type.png"))
 plt.close(fig)
 
-# ---- Figure 2: permutation importance (meta-model v2) ----
+# ---- Figure 2: permutation importance (meta-model v2, OBSERVABLE-ONLY variant) ----
 with open(os.path.join(RESULTS, "meta_model_v2_results.json")) as f:
     mv2 = json.load(f)
-imp = mv2["permutation_importance"]
+imp = mv2["observable_only"]["permutation_importance"]
 items = sorted(imp.items(), key=lambda kv: kv[1])
 names = [k.replace("ct_", "type: ").replace("_", " ") for k, v in items]
 vals = [v for k, v in items]
 fig, ax = plt.subplots(figsize=(6.5, 4.5))
 ax.barh(names, vals, color="#55A868")
 ax.set_xlabel("Permutation importance\n(drop in accuracy when shuffled)")
-ax.set_title("Meta-model: what predicts protocol correctness?")
+ax.set_title("Observable-only meta-model: what predicts protocol correctness?")
 fig.tight_layout()
 fig.savefig(os.path.join(FIGS, "fig2_permutation_importance.png"))
 plt.close(fig)

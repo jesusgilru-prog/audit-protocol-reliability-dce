@@ -41,48 +41,61 @@ def main():
     # second leakage-adjacent bug caught in external review, ronda 2)
     # replaced with obs_sigma_hat/obs_hetero_hat, computable from real
     # data alone (see observable_stats() in synth_audit_protocol.py).
-    # confound_type is kept as an explicit "what-if I suspect this
-    # mechanism" input, not something assumed known with certainty.
-    features = ["K", "n_per_facility", "obs_sigma_hat", "obs_hetero_hat",
-                "protocol_says_universal", "n_mode_unequal"] + [f"ct_{ct}" for ct in CONFOUND_TYPES]
-    X = df[features].astype(float).values
-    y = df["correct"].astype(int).values
+    #
+    # CORRECTED AGAIN after external review (Codex, ronda 5, 2026-08-18):
+    # `confound_type` is NOT an observable quantity -- it is a hypothesis
+    # the analyst brings, not something computable from data the way
+    # obs_sigma_hat/obs_hetero_hat are. Folding it into a single "pooled"
+    # accuracy number and calling the whole thing observable-only broke
+    # the paper's own stated promise. This version trains and reports
+    # TWO separate models: `observable_only` (K, n, obs_sigma_hat,
+    # obs_hetero_hat, protocol_says_universal, n_mode_unequal -- nothing
+    # a real practitioner couldn't compute) and `with_confound_type_oracle`
+    # (the same features PLUS confound_type, explicitly labeled as a
+    # what-if/oracle variant, not a claim about practical performance).
+    observable_features = ["K", "n_per_facility", "obs_sigma_hat", "obs_hetero_hat",
+                            "protocol_says_universal", "n_mode_unequal"]
+    oracle_features = observable_features + [f"ct_{ct}" for ct in CONFOUND_TYPES]
 
-    X_train, X_test, y_train, y_test, df_train, df_test = train_test_split(
-        X, y, df, test_size=0.25, random_state=RNG_SEED, stratify=df.confound_type)
+    def fit_and_eval(features, label):
+        X = df[features].astype(float).values
+        y = df["correct"].astype(int).values
+        X_train, X_test, y_train, y_test, df_train, df_test = train_test_split(
+            X, y, df, test_size=0.25, random_state=RNG_SEED, stratify=df.confound_type)
+        gbm = GradientBoostingClassifier(random_state=RNG_SEED, n_estimators=300, max_depth=4)
+        gbm.fit(X_train, y_train)
+        proba = gbm.predict_proba(X_test)[:, 1]
+        pred = gbm.predict(X_test)
+        acc = accuracy_score(y_test, pred)
+        auc = roc_auc_score(y_test, proba)
+        print(f"[{label}] pooled accuracy={acc:.3f} AUC={auc:.3f}")
 
-    gbm = GradientBoostingClassifier(random_state=RNG_SEED, n_estimators=300, max_depth=4)
-    gbm.fit(X_train, y_train)
-    proba = gbm.predict_proba(X_test)[:, 1]
-    pred = gbm.predict(X_test)
-    acc = accuracy_score(y_test, pred)
-    auc = roc_auc_score(y_test, proba)
-    print(f"Overall (all confound types pooled): accuracy={acc:.3f} AUC={auc:.3f}")
+        imp = permutation_importance(gbm, X_test, y_test, n_repeats=20, random_state=RNG_SEED)
+        importances = {f: float(m) for f, m in zip(features, imp.importances_mean)}
+        print(f"[{label}] permutation importance:")
+        for f, v in sorted(importances.items(), key=lambda kv: -kv[1]):
+            print(f"    {f:20s} {v:.4f}")
 
-    imp = permutation_importance(gbm, X_test, y_test, n_repeats=20, random_state=RNG_SEED)
-    importances = {f: float(m) for f, m in zip(features, imp.importances_mean)}
-    print("\nPermutation importance:")
-    for f, v in sorted(importances.items(), key=lambda kv: -kv[1]):
-        print(f"  {f:20s} {v:.4f}")
+        per_type = {}
+        for ct in CONFOUND_TYPES:
+            mask = df_test.confound_type.values == ct
+            if mask.sum() == 0:
+                continue
+            a = accuracy_score(y_test[mask], pred[mask])
+            au = roc_auc_score(y_test[mask], proba[mask]) if len(set(y_test[mask])) > 1 else float("nan")
+            per_type[ct] = dict(n=int(mask.sum()), accuracy=float(a), auc=float(au))
+            print(f"    [{ct}] accuracy={a:.3f} auc={au:.3f}")
 
-    # per-confound-type test accuracy, using the SAME pooled model (checks
-    # whether one meta-model, given the confound type as input, correctly
-    # tracks the very different reliability regimes found per type)
-    per_type = {}
-    for ct in CONFOUND_TYPES:
-        mask = df_test.confound_type.values == ct
-        if mask.sum() == 0:
-            continue
-        a = accuracy_score(y_test[mask], pred[mask])
-        au = roc_auc_score(y_test[mask], proba[mask]) if len(set(y_test[mask])) > 1 else float("nan")
-        per_type[ct] = dict(n=int(mask.sum()), accuracy=float(a), auc=float(au))
-        print(f"  [{ct}] meta-model accuracy={a:.3f} auc={au:.3f}")
+        return dict(pooled_accuracy=float(acc), pooled_auc=float(auc),
+                    permutation_importance=importances,
+                    per_confound_type_meta_accuracy=per_type, features=features)
+
+    observable_result = fit_and_eval(observable_features, "observable_only")
+    oracle_result = fit_and_eval(oracle_features, "with_confound_type_oracle")
 
     out = dict(
-        pooled_accuracy=float(acc),
-        pooled_auc=float(auc),
-        permutation_importance=importances,
-        per_confound_type_meta_accuracy=per_type,
+        observable_only=observable_result,
+        with_confound_type_oracle=oracle_result,
         raw_summary_by_type_and_ground_truth={
             ct: dict(
                 overall=float(df[df.confound_type == ct].correct.mean()),

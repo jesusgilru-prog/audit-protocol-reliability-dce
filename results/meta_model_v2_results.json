@@ -1,39 +1,95 @@
 {
-  "pooled_accuracy": 0.896,
-  "pooled_auc": 0.9157616020788855,
-  "permutation_importance": {
-    "K": 0.0016750000000000155,
-    "n_per_facility": 0.0017750000000000266,
-    "obs_sigma_hat": 0.319175,
-    "obs_hetero_hat": 0.055750000000000036,
-    "protocol_says_universal": 0.251725,
-    "n_mode_unequal": -0.00032499999999996974,
-    "ct_gaussian_linear": 0.0012250000000000316,
-    "ct_outlier_contaminated": 0.04885000000000002,
-    "ct_nonlinear_misspecified": 0.005050000000000027,
-    "ct_clustered": 0.00030000000000002247
+  "observable_only": {
+    "pooled_accuracy": 0.843,
+    "pooled_auc": 0.877926128399215,
+    "permutation_importance": {
+      "K": -0.00047500000000001984,
+      "n_per_facility": 0.013424999999999987,
+      "obs_sigma_hat": 0.266275,
+      "obs_hetero_hat": 0.10642499999999996,
+      "protocol_says_universal": 0.270975,
+      "n_mode_unequal": -0.0009500000000000342
+    },
+    "per_confound_type_meta_accuracy": {
+      "gaussian_linear": {
+        "n": 500,
+        "accuracy": 0.948,
+        "auc": 0.9267826493992822
+      },
+      "outlier_contaminated": {
+        "n": 500,
+        "accuracy": 0.79,
+        "auc": 0.8644330949948926
+      },
+      "nonlinear_misspecified": {
+        "n": 500,
+        "accuracy": 0.792,
+        "auc": 0.889304142354246
+      },
+      "clustered": {
+        "n": 500,
+        "accuracy": 0.842,
+        "auc": 0.8725137373268324
+      }
+    },
+    "features": [
+      "K",
+      "n_per_facility",
+      "obs_sigma_hat",
+      "obs_hetero_hat",
+      "protocol_says_universal",
+      "n_mode_unequal"
+    ]
   },
-  "per_confound_type_meta_accuracy": {
-    "gaussian_linear": {
-      "n": 500,
-      "accuracy": 0.964,
-      "auc": 0.9225308160399439
+  "with_confound_type_oracle": {
+    "pooled_accuracy": 0.896,
+    "pooled_auc": 0.9157616020788855,
+    "permutation_importance": {
+      "K": 0.0016750000000000155,
+      "n_per_facility": 0.0017750000000000266,
+      "obs_sigma_hat": 0.319175,
+      "obs_hetero_hat": 0.055750000000000036,
+      "protocol_says_universal": 0.251725,
+      "n_mode_unequal": -0.00032499999999996974,
+      "ct_gaussian_linear": 0.0012250000000000316,
+      "ct_outlier_contaminated": 0.04885000000000002,
+      "ct_nonlinear_misspecified": 0.005050000000000027,
+      "ct_clustered": 0.00030000000000002247
     },
-    "outlier_contaminated": {
-      "n": 500,
-      "accuracy": 0.92,
-      "auc": 0.8528702757916241
+    "per_confound_type_meta_accuracy": {
+      "gaussian_linear": {
+        "n": 500,
+        "accuracy": 0.964,
+        "auc": 0.9225308160399439
+      },
+      "outlier_contaminated": {
+        "n": 500,
+        "accuracy": 0.92,
+        "auc": 0.8528702757916241
+      },
+      "nonlinear_misspecified": {
+        "n": 500,
+        "accuracy": 0.85,
+        "auc": 0.894238960955458
+      },
+      "clustered": {
+        "n": 500,
+        "accuracy": 0.85,
+        "auc": 0.886270412506772
+      }
     },
-    "nonlinear_misspecified": {
-      "n": 500,
-      "accuracy": 0.85,
-      "auc": 0.894238960955458
-    },
-    "clustered": {
-      "n": 500,
-      "accuracy": 0.85,
-      "auc": 0.886270412506772
-    }
+    "features": [
+      "K",
+      "n_per_facility",
+      "obs_sigma_hat",
+      "obs_hetero_hat",
+      "protocol_says_universal",
+      "n_mode_unequal",
+      "ct_gaussian_linear",
+      "ct_outlier_contaminated",
+      "ct_nonlinear_misspecified",
+      "ct_clustered"
+    ]
   },
   "raw_summary_by_type_and_ground_truth": {
     "gaussian_linear": {
