@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+manuscript.aux
+manuscript.bbl
+manuscript.blg
+manuscript.log
+manuscript.out
+manuscript.pdf
+CUP-JNL-DTM.cls
+data_sources/
+logs/
+manuscript_v1_generic_class_SUPERSEDED.tex.bak
+perm_verify_block1.csv
+debate_brief.md
+BRIEF.md
