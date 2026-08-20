@@ -37,8 +37,9 @@ to reproduce any result here.
 
 ## Reproducing
 
-All scenario generation uses fixed random seeds (reported in each
-result file). Requires Python 3.12 with `numpy`, `pandas`,
+All scenario generation uses a fixed random seed (`RNG_SEED=20260818`,
+hardcoded in each generation script and reported in the main summary
+JSON files). Requires Python 3.12 with `numpy`, `pandas`,
 `scikit-learn`, `matplotlib`.
 
 ```
