@@ -20,20 +20,22 @@ labels = ["Gaussian\nparameter drift", "Drift with\noutlier contamination", "Non
 
 acc_universal = [df2[(df2.confound_type == t) & (df2.is_universal)].correct.mean() for t in types]
 acc_confounded = [df2[(df2.confound_type == t) & (~df2.is_universal)].correct.mean() for t in types]
+acc_universal_perm = [df2[(df2.confound_type == t) & (df2.is_universal)].perm_correct.mean() for t in types]
 acc_confounded_perm = [df2[(df2.confound_type == t) & (~df2.is_universal)].perm_correct.mean() for t in types]
 
-fig, ax = plt.subplots(figsize=(7.2, 4.2))
+fig, ax = plt.subplots(figsize=(7.6, 4.2))
 x = np.arange(len(types))
-w = 0.27
-ax.bar(x - w, acc_universal, w, label="Universal (threshold rule)", color="#4C72B0")
-ax.bar(x, acc_confounded, w, label="Confounded (threshold rule)", color="#C44E52")
-ax.bar(x + w, acc_confounded_perm, w, label="Confounded (permutation rule)", color="#55A868")
+w = 0.2
+ax.bar(x - 1.5*w, acc_universal, w, label="Universal (threshold rule)", color="#4C72B0")
+ax.bar(x - 0.5*w, acc_confounded, w, label="Confounded (threshold rule)", color="#C44E52")
+ax.bar(x + 0.5*w, acc_universal_perm, w, label="Universal (permutation rule)", color="#8172B3")
+ax.bar(x + 1.5*w, acc_confounded_perm, w, label="Confounded (permutation rule)", color="#55A868")
 ax.set_xticks(x)
 ax.set_xticklabels(labels, fontsize=9)
 ax.set_ylabel("Protocol accuracy\n(correct verdict vs. ground truth)")
 ax.set_ylim(0, 1.05)
 ax.axhline(0.5, color="grey", ls="--", lw=0.8)
-ax.legend(loc="lower left", fontsize=7.5)
+ax.legend(loc="lower left", fontsize=7, ncol=2)
 ax.set_title("LOFO-verdict accuracy by confounding mechanism:\nthreshold rule vs. permutation rule")
 fig.tight_layout()
 fig.savefig(os.path.join(FIGS, "fig1_accuracy_by_confound_type.png"), bbox_inches="tight")
