@@ -68,7 +68,12 @@ def main():
         pred = gbm.predict(X_test)
         acc = accuracy_score(y_test, pred)
         auc = roc_auc_score(y_test, proba)
-        print(f"[{label}] pooled accuracy={acc:.3f} AUC={auc:.3f}")
+        # F3 (external review, 2026-08-20): same-target majority-class
+        # baseline (predict the majority `correct` value on this test
+        # split), not the unrelated is_universal majority-class rate.
+        baseline_acc = float(max(y_test.mean(), 1 - y_test.mean()))
+        print(f"[{label}] pooled accuracy={acc:.3f} AUC={auc:.3f}  "
+              f"(baseline={baseline_acc:.3f})")
 
         imp = permutation_importance(gbm, X_test, y_test, n_repeats=20, random_state=RNG_SEED)
         importances = {f: float(m) for f, m in zip(features, imp.importances_mean)}
@@ -87,6 +92,7 @@ def main():
             print(f"    [{ct}] accuracy={a:.3f} auc={au:.3f}")
 
         return dict(pooled_accuracy=float(acc), pooled_auc=float(auc),
+                    majority_correct_baseline_accuracy=baseline_acc,
                     permutation_importance=importances,
                     per_confound_type_meta_accuracy=per_type, features=features)
 

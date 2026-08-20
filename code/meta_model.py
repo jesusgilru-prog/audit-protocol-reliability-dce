@@ -98,8 +98,33 @@ def main():
     gp_acc = accuracy_score(y_test, gp_pred)
     gp_auc = roc_auc_score(y_test, gp_proba)
 
-    print(f"GBM  test accuracy={gbm_acc:.3f}  AUC={gbm_auc:.3f}")
+    # F3 (external review, 2026-08-20): the meta-model's target `correct`
+    # is itself imbalanced (the protocol is right ~91% of the time
+    # overall), so raw test accuracy needs a same-target baseline, not
+    # the (unrelated) is_universal majority-class rate reported
+    # elsewhere. Baseline = always predicting the majority value of
+    # `correct` on the same test split.
+    baseline_acc = float(max(y_test.mean(), 1 - y_test.mean()))
+
+    # F2 (external review, 2026-08-20): the GBM's near-certainty for
+    # protocol_says_universal=False inputs (used at the real-case anchor
+    # below) is a tautological property of this generator, not evidence
+    # about the specific real case -- the universal arm essentially never
+    # produces a false "not universal" verdict, so conditioning on the
+    # observed verdict being False already near-determines ground truth
+    # is confounded, independent of any other feature value. Computed
+    # directly on the full dataset (not just the test split) to quantify
+    # this exactly.
+    df_neg = df[df.protocol_says_universal == 0]
+    tautology_p_correct_given_says_confounded = float(df_neg["correct"].mean())
+    tautology_n = int(len(df_neg))
+
+    print(f"GBM  test accuracy={gbm_acc:.3f}  AUC={gbm_auc:.3f}  (baseline={baseline_acc:.3f}, "
+          f"i.e. always predicting the majority `correct` value)")
     print(f"GP   test accuracy={gp_acc:.3f}  AUC={gp_auc:.3f}  (trained on {len(sub_idx)} pts)")
+    print(f"\nF2 check: P(correct=1 | protocol_says_universal=False) = "
+          f"{tautology_p_correct_given_says_confounded:.4f}  (n={tautology_n}) -- "
+          f"near-1 by construction of the universal arm, not case-specific evidence")
     print("\nPermutation importance (GBM), predicting verdict correctness:")
     for f, v in sorted(importances.items(), key=lambda kv: -kv[1]):
         print(f"  {f:24s} {v:.4f}")
@@ -144,6 +169,11 @@ def main():
         gbm=dict(test_accuracy=float(gbm_acc), test_auc=float(gbm_auc),
                   permutation_importance=importances),
         gp=dict(test_accuracy=float(gp_acc), test_auc=float(gp_auc), n_train=len(sub_idx)),
+        majority_correct_baseline_accuracy=baseline_acc,
+        tautology_check=dict(
+            p_correct_given_protocol_says_confounded=tautology_p_correct_given_says_confounded,
+            n=tautology_n,
+        ),
         real_windage_case_anchor_sweep=anchor_sweep,
         real_windage_case_anchor_summary=dict(
             gbm_p_correct_min=float(min(gbm_ps)), gbm_p_correct_max=float(max(gbm_ps)),

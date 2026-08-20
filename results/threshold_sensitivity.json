@@ -1,50 +1,50 @@
 [
   {
     "threshold": -0.5,
-    "overall": 0.5755,
+    "overall": 0.5735,
     "when_universal": 1.0,
-    "when_confounded": 0.12833675564681724
+    "when_confounded": 0.14141922496225465
   },
   {
     "threshold": -0.2,
-    "overall": 0.6825,
+    "overall": 0.67925,
     "when_universal": 1.0,
-    "when_confounded": 0.3480492813141684
+    "when_confounded": 0.35430296930045296
   },
   {
     "threshold": -0.1,
-    "overall": 0.83,
+    "overall": 0.82025,
     "when_universal": 1.0,
-    "when_confounded": 0.6509240246406571
+    "when_confounded": 0.638147961751384
   },
   {
     "threshold": 0.0,
-    "overall": 0.9075,
+    "overall": 0.90075,
     "when_universal": 1.0,
-    "when_confounded": 0.8100616016427105
+    "when_confounded": 0.8002013085052844
   },
   {
     "threshold": 0.1,
-    "overall": 0.9265,
-    "when_universal": 0.9995126705653021,
-    "when_confounded": 0.8495893223819302
+    "overall": 0.921,
+    "when_universal": 1.0,
+    "when_confounded": 0.8409662808253648
   },
   {
     "threshold": 0.2,
-    "overall": 0.94,
-    "when_universal": 0.9995126705653021,
-    "when_confounded": 0.8773100616016427
+    "overall": 0.9355,
+    "when_universal": 1.0,
+    "when_confounded": 0.8701560140915954
   },
   {
     "threshold": 0.3,
-    "overall": 0.95125,
-    "when_universal": 0.9990253411306043,
-    "when_confounded": 0.9009240246406571
+    "overall": 0.94675,
+    "when_universal": 1.0,
+    "when_confounded": 0.8928032209360846
   },
   {
     "threshold": 0.5,
-    "overall": 0.96675,
-    "when_universal": 0.9990253411306043,
-    "when_confounded": 0.9327515400410678
+    "overall": 0.96375,
+    "when_universal": 1.0,
+    "when_confounded": 0.9270256668344238
   }
 ]

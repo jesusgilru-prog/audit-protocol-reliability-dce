@@ -183,20 +183,91 @@ def observable_stats(df):
     return obs_sigma_hat, obs_hetero_hat
 
 
+def _lofo_r2_fast(X, y, g):
+    """Same LOFO R^2 as lofo_pooled_r2, but via closed-form downdating of
+    the normal equations (fit once on the full pooled data, subtract each
+    held-out facility's contribution) instead of refitting K times from
+    scratch. Numerically equivalent, ~K x faster -- needed because the
+    permutation test below calls this NPERM times per scenario.
+    Verified to reproduce lofo_pooled_r2 exactly (see BRIEF.md, permutation
+    test integration, 2026-08-20)."""
+    ug = np.unique(g)
+    if len(ug) < 2:
+        return np.nan
+    Stot = X.T @ X
+    btot = X.T @ y
+    ss_res = 0.0
+    for k in ug:
+        m = g == k
+        Xk, yk = X[m], y[m]
+        S = Stot - Xk.T @ Xk
+        b = btot - Xk.T @ yk
+        try:
+            coef = np.linalg.solve(S, b)
+        except np.linalg.LinAlgError:
+            return np.nan
+        ss_res += float(np.sum((yk - Xk @ coef) ** 2))
+    ss_tot = float(np.sum((y - y.mean()) ** 2))
+    return 1 - ss_res / ss_tot if ss_tot > 0 else np.nan
+
+
+def permutation_test(df, rng, nperm=99):
+    """Facility-label permutation test for the LOFO R^2 statistic: instead
+    of the fixed threshold R^2_LOFO > 0, compare the OBSERVED LOFO R^2 to
+    its null distribution under NPERM random re-shufflings of which point
+    belongs to which facility (holding the design X, y fixed) -- the
+    protocol declares "universal" if the observed R^2 is not significantly
+    below what random facility labels would produce (p > 0.05), i.e. the
+    facility label carries no information the null distribution wouldn't
+    also produce by chance.
+
+    Added after external review (multi-model debate, 2026-08-20): the
+    fixed R^2>0 threshold has near-zero power against nonlinear
+    misspecification and clustered confounding (see Results); this
+    permutation-based alternative was proposed and empirically verified
+    (independently reproduced by the author before integrating it here)
+    to recover the large majority of those cases. Implementation matches
+    the exact method used in that independent verification.
+    """
+    X = np.column_stack([np.ones(len(df)), df.log_re.values, df.log_pg.values])
+    y = df.log_cp.values
+    g = df.facility.values
+    obs = _lofo_r2_fast(X, y, g)
+    if not np.isfinite(obs):
+        return obs, np.nan, False
+    cnt, n_ok = 0, 0
+    for _ in range(nperm):
+        gp = rng.permutation(g)
+        r = _lofo_r2_fast(X, y, gp)
+        if np.isfinite(r):
+            n_ok += 1
+            if r <= obs:
+                cnt += 1
+    if n_ok == 0:
+        return obs, np.nan, False
+    pval = (1 + cnt) / (1 + n_ok)
+    perm_says_universal = bool(pval > 0.05)
+    return obs, float(pval), perm_says_universal
+
+
 def run_scenario(K, n_per_facility, sigma, heterogeneity, is_universal, rng,
-                  n_boot=200):
+                  n_boot=200, nperm=99):
     df = gen_scenario(K, n_per_facility, sigma, heterogeneity, is_universal, rng)
     r2_lofo = lofo_pooled_r2(df)
     protocol_says_universal = bool(r2_lofo is not None and not np.isnan(r2_lofo) and r2_lofo > 0)
     boot_lo, boot_hi, boot_stable = bootstrap_reynolds_ci(df, n_boot, rng)
     obs_sigma_hat, obs_hetero_hat = observable_stats(df)
+    _, perm_pvalue, perm_says_universal = permutation_test(df, rng, nperm=nperm)
     correct = protocol_says_universal == is_universal
+    perm_correct = perm_says_universal == is_universal
     return dict(K=K, n_per_facility=n_per_facility, sigma=sigma,
                 heterogeneity=heterogeneity, is_universal=is_universal,
                 r2_lofo=r2_lofo, protocol_says_universal=protocol_says_universal,
                 bootstrap_a_ci_lo=boot_lo, bootstrap_a_ci_hi=boot_hi,
                 bootstrap_a_stable=boot_stable,
                 obs_sigma_hat=obs_sigma_hat, obs_hetero_hat=obs_hetero_hat,
+                perm_pvalue=perm_pvalue, perm_says_universal=perm_says_universal,
+                perm_correct=perm_correct,
                 correct=correct)
 
 
@@ -236,6 +307,24 @@ def main():
     print(f"  when truly universal:  {boot_stable_when_universal:.3f}")
     print(f"  when truly confounded: {boot_stable_when_confounded:.3f}")
 
+    perm_valid = df.dropna(subset=["perm_correct"])
+    perm_overall_acc = float(perm_valid.perm_correct.mean())
+    perm_acc_universal = float(perm_valid[perm_valid.is_universal].perm_correct.mean())
+    perm_acc_confounded = float(perm_valid[~perm_valid.is_universal].perm_correct.mean())
+    print(f"\npermutation test (nperm=99, alpha=0.05) accuracy vs the fixed "
+          f"R^2>0 threshold:")
+    print(f"  overall: {perm_overall_acc:.3f} (threshold rule: {overall_acc:.3f})")
+    print(f"  when truly universal:  {perm_acc_universal:.3f}")
+    print(f"  when truly confounded: {perm_acc_confounded:.3f} "
+          f"(threshold rule: {df[~df.is_universal].correct.mean():.3f})")
+
+    # F3 (external review, 2026-08-20): "always predict universal" trivial
+    # baseline, since is_universal is drawn ~50/50 by construction the
+    # majority-class rate reveals how much the threshold/permutation rules
+    # actually add beyond guessing the more common label.
+    majority_baseline_acc = float(max(df.is_universal.mean(), 1 - df.is_universal.mean()))
+    print(f"\nbaseline ('always predict the majority label'): {majority_baseline_acc:.3f}")
+
     summary = dict(
         n_scenarios=N_SCENARIOS,
         rng_seed=RNG_SEED,
@@ -246,6 +335,12 @@ def main():
         bootstrap_a_stable_when_confounded=boot_stable_when_confounded,
         bootstrap_n_boot_per_scenario=200,
         bootstrap_method="facility-level resampling with replacement, percentile 95% CI on the Reynolds-like exponent (2nd OLS coefficient)",
+        permutation_overall_accuracy=perm_overall_acc,
+        permutation_accuracy_when_universal=perm_acc_universal,
+        permutation_accuracy_when_confounded=perm_acc_confounded,
+        permutation_nperm=99,
+        permutation_alpha=0.05,
+        majority_class_baseline_accuracy=majority_baseline_acc,
         ground_truth_law="log(Cp) = 2.0 - 0.45*log(Re) + 0.30*log(Pg) (+ per-facility deviation if confounded)",
     )
     with open(os.path.join(OUT_DIR, "synth_scenarios_summary.json"), "w") as f:

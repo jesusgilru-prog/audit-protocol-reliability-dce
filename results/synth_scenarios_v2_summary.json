@@ -1,74 +1,119 @@
 {
   "gaussian_linear": {
     "n": 2000,
-    "overall_accuracy": 0.903,
+    "overall_accuracy": 0.9115,
     "accuracy_when_universal": 1.0,
     "accuracy_when_universal_ci95": [
-      0.996247994464769,
-      0.9999999999999999
+      0.9961770498351029,
+      1.0000000000000002
     ],
-    "accuracy_when_confounded": 0.8020408163265306,
+    "accuracy_when_confounded": 0.8228228228228228,
     "accuracy_when_confounded_ci95": [
-      0.7759351594338366,
-      0.8257878058797163
+      0.7979225177117456,
+      0.8452499342513963
     ],
     "bootstrap_a_stable_when_universal": 1.0,
-    "bootstrap_a_stable_when_confounded": 0.6959183673469388
+    "bootstrap_a_stable_when_confounded": 0.7097097097097097,
+    "permutation_overall_accuracy": 0.969,
+    "permutation_accuracy_when_universal": 0.948051948051948,
+    "permutation_accuracy_when_universal_ci95": [
+      0.9325111193138059,
+      0.9601670162527148
+    ],
+    "permutation_accuracy_when_confounded": 0.98998998998999,
+    "permutation_accuracy_when_confounded_ci95": [
+      0.9816723032214145,
+      0.9945537905334938
+    ]
   },
   "outlier_contaminated": {
     "n": 2000,
-    "overall_accuracy": 0.899,
-    "accuracy_when_universal": 0.9968911917098445,
+    "overall_accuracy": 0.8905,
+    "accuracy_when_universal": 0.9970326409495549,
     "accuracy_when_universal_ci95": [
-      0.9908998602091812,
-      0.9989421735610566
+      0.9913121386211818,
+      0.9989903280989594
     ],
-    "accuracy_when_confounded": 0.8077294685990338,
+    "accuracy_when_confounded": 0.78159757330637,
     "accuracy_when_confounded_ci95": [
-      0.7826003440057552,
-      0.8305827308429616
+      0.7547852182681136,
+      0.8062308382749013
     ],
     "bootstrap_a_stable_when_universal": 1.0,
-    "bootstrap_a_stable_when_confounded": 0.7304347826086957
+    "bootstrap_a_stable_when_confounded": 0.7087967644084934,
+    "permutation_overall_accuracy": 0.9615,
+    "permutation_accuracy_when_universal": 0.9475766567754699,
+    "permutation_accuracy_when_universal_ci95": [
+      0.9320656304540579,
+      0.9596992773884575
+    ],
+    "permutation_accuracy_when_confounded": 0.9757330637007078,
+    "permutation_accuracy_when_confounded_ci95": [
+      0.9641454704512967,
+      0.9836392857551254
+    ]
   },
   "nonlinear_misspecified": {
     "n": 2000,
-    "overall_accuracy": 0.5345,
-    "accuracy_when_universal": 0.9989909182643795,
+    "overall_accuracy": 0.538,
+    "accuracy_when_universal": 1.0,
     "accuracy_when_universal_ci95": [
-      0.9943064014410559,
-      0.9998218500819367
+      0.9960954493366252,
+      1.0000000000000002
     ],
-    "accuracy_when_confounded": 0.07829534192269574,
+    "accuracy_when_confounded": 0.09411764705882353,
     "accuracy_when_confounded_ci95": [
-      0.06327360423718356,
-      0.09651592393747754
+      0.07769021861422054,
+      0.11359082117320218
     ],
     "bootstrap_a_stable_when_universal": 1.0,
-    "bootstrap_a_stable_when_confounded": 0.998017839444995
+    "bootstrap_a_stable_when_confounded": 0.9882352941176471,
+    "permutation_overall_accuracy": 0.9205,
+    "permutation_accuracy_when_universal": 0.9479591836734694,
+    "permutation_accuracy_when_universal_ci95": [
+      0.9322215091164563,
+      0.9601986995749283
+    ],
+    "permutation_accuracy_when_confounded": 0.8941176470588236,
+    "permutation_accuracy_when_confounded_ci95": [
+      0.873734053266848,
+      0.9115437776642052
+    ]
   },
   "clustered": {
     "n": 2000,
-    "overall_accuracy": 0.705,
-    "accuracy_when_universal": 1.0,
+    "overall_accuracy": 0.7035,
+    "accuracy_when_universal": 0.9989658738366081,
     "accuracy_when_universal_ci95": [
-      0.996244326246686,
-      0.9999999999999998
+      0.9941656690583818,
+      0.9998174280089915
     ],
-    "accuracy_when_confounded": 0.3985728848114169,
+    "accuracy_when_confounded": 0.4269119070667957,
     "accuracy_when_confounded_ci95": [
-      0.36838786413405405,
-      0.42954915586275416
+      0.3970741828194124,
+      0.45729120861492734
     ],
     "bootstrap_a_stable_when_universal": 1.0,
-    "bootstrap_a_stable_when_confounded": 0.8858307849133538
+    "bootstrap_a_stable_when_confounded": 0.8683446272991288,
+    "permutation_overall_accuracy": 0.9535,
+    "permutation_accuracy_when_universal": 0.9400206825232679,
+    "permutation_accuracy_when_universal_ci95": [
+      0.923242146027031,
+      0.9533170411277199
+    ],
+    "permutation_accuracy_when_confounded": 0.9661181026137464,
+    "permutation_accuracy_when_confounded_ci95": [
+      0.9532439427284526,
+      0.9755383622300303
+    ]
   },
   "n_mode_equal": {
-    "n": 3974,
-    "overall_accuracy": 0.754906894816306
+    "n": 4069,
+    "overall_accuracy": 0.7544851314819366
   },
   "n_mode_unequal": {
-    "n": 4026,
-    "overall_accuracy": 0.765772478887233
-  }
+    "n": 3931,
+    "overall_accuracy": 0.7674891885016535
+  },
+  "majority_class_baseline_accuracy": 0.505125
 }

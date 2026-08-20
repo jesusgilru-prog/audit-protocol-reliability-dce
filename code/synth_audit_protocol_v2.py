@@ -83,8 +83,21 @@ def gen_scenario(K, n_per_facility, sigma, heterogeneity, is_universal,
     frames = []
 
     if confound_type == "clustered" and not is_universal:
-        # 2 latent clusters; within-cluster identical law, across differs
+        # 2 latent clusters; within-cluster identical law, across differs.
+        #
+        # BUG FIXED after external review (multi-model debate, 2026-08-20,
+        # finding independently verified before fixing): rng.integers(0,2,K)
+        # can put every facility in the same cluster by chance
+        # (P = 2*0.5**K, e.g. 12.5% at K=4 up to 50% at K=2), which produces
+        # a scenario with IDENTICAL law across all K facilities -- i.e.
+        # genuinely universal -- while still labeled is_universal=False.
+        # This silently biased the reported "when confounded" accuracy for
+        # this mechanism downward. Fixed by resampling until both clusters
+        # are populated (rejection sampling, K>=2 always makes this
+        # terminate quickly).
         cluster_of = rng.integers(0, 2, size=K)
+        while len(set(cluster_of)) < 2:
+            cluster_of = rng.integers(0, 2, size=K)
         cluster_params = {
             0: (B0_TRUE, A_TRUE, B_TRUE),
             1: (B0_TRUE + rng.normal(0, heterogeneity),
@@ -209,15 +222,62 @@ def observable_stats(df):
     return obs_sigma_hat, obs_hetero_hat
 
 
+def _lofo_r2_fast(X, y, g):
+    """Same as v1's _lofo_r2_fast -- see its docstring."""
+    ug = np.unique(g)
+    if len(ug) < 2:
+        return np.nan
+    Stot = X.T @ X
+    btot = X.T @ y
+    ss_res = 0.0
+    for k in ug:
+        m = g == k
+        Xk, yk = X[m], y[m]
+        S = Stot - Xk.T @ Xk
+        b = btot - Xk.T @ yk
+        try:
+            coef = np.linalg.solve(S, b)
+        except np.linalg.LinAlgError:
+            return np.nan
+        ss_res += float(np.sum((yk - Xk @ coef) ** 2))
+    ss_tot = float(np.sum((y - y.mean()) ** 2))
+    return 1 - ss_res / ss_tot if ss_tot > 0 else np.nan
+
+
+def permutation_test(df, rng, nperm=99):
+    """Same facility-label permutation test as v1 -- see its docstring."""
+    X = np.column_stack([np.ones(len(df)), df.log_re.values, df.log_pg.values])
+    y = df.log_cp.values
+    g = df.facility.values
+    obs = _lofo_r2_fast(X, y, g)
+    if not np.isfinite(obs):
+        return obs, np.nan, False
+    cnt, n_ok = 0, 0
+    for _ in range(nperm):
+        gp = rng.permutation(g)
+        r = _lofo_r2_fast(X, y, gp)
+        if np.isfinite(r):
+            n_ok += 1
+            if r <= obs:
+                cnt += 1
+    if n_ok == 0:
+        return obs, np.nan, False
+    pval = (1 + cnt) / (1 + n_ok)
+    perm_says_universal = bool(pval > 0.05)
+    return obs, float(pval), perm_says_universal
+
+
 def run_scenario(K, n_per_facility, sigma, heterogeneity, is_universal,
-                  confound_type, n_mode, rng, n_boot=200):
+                  confound_type, n_mode, rng, n_boot=200, nperm=99):
     df = gen_scenario(K, n_per_facility, sigma, heterogeneity, is_universal,
                        confound_type, n_mode, rng)
     r2_lofo = lofo_pooled_r2(df)
     protocol_says_universal = bool(r2_lofo is not None and not np.isnan(r2_lofo) and r2_lofo > 0)
     boot_lo, boot_hi, boot_stable = bootstrap_reynolds_ci(df, n_boot, rng)
     obs_sigma_hat, obs_hetero_hat = observable_stats(df)
+    _, perm_pvalue, perm_says_universal = permutation_test(df, rng, nperm=nperm)
     correct = protocol_says_universal == is_universal
+    perm_correct = perm_says_universal == is_universal
     return dict(K=K, n_per_facility=n_per_facility, sigma=sigma,
                 heterogeneity=heterogeneity, is_universal=is_universal,
                 confound_type=confound_type, n_mode=n_mode,
@@ -225,6 +285,8 @@ def run_scenario(K, n_per_facility, sigma, heterogeneity, is_universal,
                 bootstrap_a_ci_lo=boot_lo, bootstrap_a_ci_hi=boot_hi,
                 bootstrap_a_stable=boot_stable,
                 obs_sigma_hat=obs_sigma_hat, obs_hetero_hat=obs_hetero_hat,
+                perm_pvalue=perm_pvalue, perm_says_universal=perm_says_universal,
+                perm_correct=perm_correct,
                 correct=correct)
 
 
@@ -257,12 +319,21 @@ def main():
     for ctype in CONFOUND_TYPES:
         sub = df[df.confound_type == ctype]
         boot_sub = sub.dropna(subset=["bootstrap_a_stable"])
+        perm_sub = sub.dropna(subset=["perm_correct"])
         n_conf = int((~sub.is_universal).sum())
         k_conf = int((sub[~sub.is_universal].correct).sum())
         ci_conf = wilson_ci(k_conf, n_conf)
         n_univ = int(sub.is_universal.sum())
         k_univ = int((sub[sub.is_universal].correct).sum())
         ci_univ = wilson_ci(k_univ, n_univ)
+
+        n_perm_conf = int((~perm_sub.is_universal).sum())
+        k_perm_conf = int((perm_sub[~perm_sub.is_universal].perm_correct).sum())
+        ci_perm_conf = wilson_ci(k_perm_conf, n_perm_conf)
+        n_perm_univ = int(perm_sub.is_universal.sum())
+        k_perm_univ = int((perm_sub[perm_sub.is_universal].perm_correct).sum())
+        ci_perm_univ = wilson_ci(k_perm_univ, n_perm_univ)
+
         summary[ctype] = dict(
             n=len(sub),
             overall_accuracy=float(sub.correct.mean()),
@@ -272,11 +343,21 @@ def main():
             accuracy_when_confounded_ci95=ci_conf,
             bootstrap_a_stable_when_universal=float(boot_sub[boot_sub.is_universal].bootstrap_a_stable.mean()),
             bootstrap_a_stable_when_confounded=float(boot_sub[~boot_sub.is_universal].bootstrap_a_stable.mean()),
+            permutation_overall_accuracy=float(perm_sub.perm_correct.mean()),
+            permutation_accuracy_when_universal=float(perm_sub[perm_sub.is_universal].perm_correct.mean()),
+            permutation_accuracy_when_universal_ci95=ci_perm_univ,
+            permutation_accuracy_when_confounded=float(perm_sub[~perm_sub.is_universal].perm_correct.mean()),
+            permutation_accuracy_when_confounded_ci95=ci_perm_conf,
         )
     for n_mode in ["equal", "unequal"]:
         sub = df[df.n_mode == n_mode]
         summary[f"n_mode_{n_mode}"] = dict(
             n=len(sub), overall_accuracy=float(sub.correct.mean()))
+
+    # F3 (external review, 2026-08-20): majority-class trivial baseline,
+    # pooled across all 8000 scenarios.
+    summary["majority_class_baseline_accuracy"] = float(
+        max(df.is_universal.mean(), 1 - df.is_universal.mean()))
 
     print("\n=== Summary by confound type ===")
     for ctype, s in summary.items():
