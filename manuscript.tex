@@ -25,10 +25,13 @@
 \title[Cross-Domain Audit Protocol Reliability]{When Does a Cross-Domain Audit Protocol Actually Detect Universality? A Synthetic-Data Study of Scaling-Law Discovery Under Domain Confounding}
 
 \author[1]{Jes\'us Gil Ruiz}
+\author[2]{Roberto A. Pava-D\'iaz}
+\author[2]{Carlos Enrique Montenegro Mar\'in}
 
-\authormark{Gil Ruiz}
+\authormark{Gil Ruiz et al.}
 
 \address[1]{\orgdiv{Science and Aerospace Department}, \orgname{Universidad Europea de Madrid}, \orgaddress{\city{Villaviciosa de Od\'on}, \country{Spain}}. \email{jesus.gil@universidadeuropea.es}}
+\address[2]{\orgdiv{Faculty of Engineering}, \orgname{Universidad Distrital Francisco Jos\'e de Caldas}, \orgaddress{\city{Bogot\'a}, \country{Colombia}}}
 
 \keywords{domain generalization, scaling-law discovery, leave-one-group-out cross-validation, bootstrap, synthetic benchmarking, model misspecification}
 
@@ -286,22 +289,22 @@ We do not restate, and did not re-derive, any finer-grained breakdown (e.g.\ per
 \begin{Backmatter}
 
 \paragraph{Acknowledgments}
-Large language model assistance (Claude Sonnet 5 and Claude Opus 5, Anthropic, August 2026) was used for code implementation, literature search and reference verification, synthetic-experiment design, and manuscript drafting. All code was executed and its output inspected by the author; the author checked available DOI or publisher metadata for each cited reference that has one (the two unpublished companion manuscripts were checked against their own source files instead, since neither has a public record yet).
+Large language model assistance (Claude Sonnet 5 and Claude Opus 5, Anthropic, August 2026) was used for code implementation, literature search and reference verification, synthetic-experiment design, and manuscript drafting. All code was executed and its output inspected by the corresponding author; the corresponding author checked available DOI or publisher metadata for each cited reference that has one (the two unpublished companion manuscripts were checked against their own source files instead, since neither has a public record yet).
 
 \paragraph{Funding Statement}
 No external funding.
 
 \paragraph{Competing Interests}
-The author declares no competing interests.
+The authors declare no competing interests.
 
 \paragraph{Data Availability Statement}
-All synthetic scenario generation, audit protocol, and meta-model code, together with all reported summary statistics, are publicly available at \url{https://github.com/jesusgilru-prog/audit-protocol-reliability-dce}, tagged release \texttt{v1.5-ronda10} for a stable, citable snapshot matching the numbers reported in this manuscript. Generated with a fixed random seed (\texttt{RNG\_SEED=20260818}, hardcoded in each generation script and reported in the main summary JSON files) for exact reproducibility. A permanent Zenodo DOI archiving this repository will be minted and added here upon acceptance.
+All synthetic scenario generation, audit protocol, and meta-model code, together with all reported summary statistics, are publicly available at \url{https://github.com/jesusgilru-prog/audit-protocol-reliability-dce}, tagged release \texttt{v1.6-authors} for a stable, citable snapshot matching the numbers reported in this manuscript. Generated with a fixed random seed (\texttt{RNG\_SEED=20260818}, hardcoded in each generation script and reported in the main summary JSON files) for exact reproducibility. A permanent Zenodo DOI archiving this repository will be minted and added here upon acceptance.
 
 \paragraph{Ethical Standards}
-This study uses only synthetic data and summary statistics reported in companion manuscripts by the same author; it involves no human or animal subjects and no new experimental data collection.
+This study uses only synthetic data and summary statistics reported in companion manuscripts by the corresponding author; it involves no human or animal subjects and no new experimental data collection.
 
 \paragraph{Author Contributions}
-Conceptualization: J.G.R. Methodology: J.G.R. Software: J.G.R. Data curation: J.G.R. Writing original draft: J.G.R.
+Conceptualization: J.G.R. Methodology: J.G.R. Software: J.G.R. Data curation: J.G.R. Writing original draft: J.G.R. Validation: R.A.P.D., C.E.M.M. Writing -- review and editing: R.A.P.D., C.E.M.M.
 
 \bibliographystyle{plain}
 \bibliography{refs}

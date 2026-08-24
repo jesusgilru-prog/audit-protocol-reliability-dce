@@ -7,6 +7,10 @@ manuscript.blg
 manuscript.log
 manuscript.out
 manuscript.pdf
+cover_letter.aux
+cover_letter.log
+cover_letter.out
+cover_letter.pdf
 CUP-JNL-DTM.cls
 data_sources/
 logs/

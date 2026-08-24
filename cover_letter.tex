@@ -1,0 +1,36 @@
+\documentclass[12pt,a4paper]{letter}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+
+\signature{Jes\'us Gil Ruiz\\Universidad Europea de Madrid\\Villaviciosa de Od\'on, Spain\\jesus.gil@universidadeuropea.es}
+\address{Jes\'us Gil Ruiz\\Universidad Europea de Madrid\\Villaviciosa de Od\'on, Spain}
+\date{\today}
+
+\begin{document}
+
+\begin{letter}{Editorial Office\\Data-Centric Engineering\\Cambridge University Press}
+
+\opening{Dear Editor,}
+
+On behalf of my co-authors, I would like to offer for your consideration, as a Research Article in \textit{Data-Centric Engineering}, the manuscript entitled \textbf{``When Does a Cross-Domain Audit Protocol Actually Detect Universality? A Synthetic-Data Study of Scaling-Law Discovery Under Domain Confounding''}.
+
+\textbf{Problem and approach.} Leave-one-facility-out (LOFO) cross-validation with bootstrap resampling is a standard protocol for auditing whether a data-driven scaling law generalizes across experimental sources or is an artifact of a single facility. Two companion manuscripts of the corresponding author applied exactly this protocol to a real 114-point windage dataset spanning four facilities and found that a good in-sample fit collapses under LOFO. That negative result raises a question a single small dataset cannot answer on its own: is the audit protocol itself reliable at that scale, or could the negative verdict be a false alarm from too little data? This paper answers that question directly, using synthetic data with known ground truth rather than further analysis of the same small real dataset.
+
+\textbf{Contributions.} (i) A two-pass synthetic benchmark (4,000 scenarios under Gaussian parameter drift, plus 8,000 scenarios spanning four confounding mechanisms) with both LOFO cross-validation and facility-level bootstrap implemented, matching the companion studies' own methodology. (ii) A quantified characterization of the conventional LOFO$>0$ declaration rule's blind spots: it is reliable against parameter drift and heavy noise, but detects only 9.4\% of nonlinear-misspecified and 42.7\% of clustered (partially universal) confounding, and this blind spot does not shrink -- for nonlinear misspecification it worsens -- with more facilities. (iii) A facility-label permutation test, computed from the same fits at no extra data-collection cost, shown to close most of this gap (96.5\% vs.\ 90.1\% overall accuracy on the first pass; every mechanism reaches 89--99\% detection on the second), which we recommend as a practical replacement for the plain threshold rule. (iv) An observable-only meta-model estimating verdict reliability from statistics a practitioner can actually compute, applied to the real windage case's own observed verdict as an external check, with an explicit accounting of why part of that check is a tautological property of the generator rather than case-specific evidence -- a limitation we chose to report rather than omit.
+
+\textbf{Reproducibility.} Every reported number is backed by an accompanying script and results file, generated with a fixed random seed for exact reproducibility. The complete source code, synthetic data, and summary statistics are already publicly available on GitHub (tagged release, cited in the manuscript's Data Availability Statement); a permanent Zenodo DOI will be minted and added upon acceptance.
+
+\textbf{Declarations.} This study uses only synthetic data and summary statistics reported in unpublished companion manuscripts by the corresponding author; it involves no human or animal subjects and no new experimental data collection. The manuscript has not been published elsewhere and is not under consideration at any other journal. All authors have approved the manuscript and agree to its submission. The authors have no competing interests to declare.
+
+Thank you for your time and for considering this submission.
+
+\closing{Sincerely, on behalf of all authors,}
+
+\vspace{1em}
+\noindent Roberto A. Pava-D\'iaz, Universidad Distrital Francisco Jos\'e de Caldas\\
+Carlos Enrique Montenegro Mar\'in, Universidad Distrital Francisco Jos\'e de Caldas
+
+\end{letter}
+\end{document}
