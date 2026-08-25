@@ -1,0 +1,93 @@
+{
+  "rng_seed": 20260828,
+  "nperm": 99,
+  "alpha": 0.05,
+  "binning_statistic": "shared_points_on_worst_fold",
+  "total_draws": 11782,
+  "bins": [
+    {
+      "shared_points": "0",
+      "n_universal": 140,
+      "n_confounded": 140,
+      "stratified_false_alarm": 0.050000000000000044,
+      "stratified_power": 0.6071428571428571,
+      "stratified_power_ci95": [
+        0.5244180870426445,
+        0.6841448700210526
+      ],
+      "naive_false_alarm": 0.2857142857142857,
+      "threshold_power": 0.8,
+      "threshold_false_alarm": 0.0
+    },
+    {
+      "shared_points": "1",
+      "n_universal": 140,
+      "n_confounded": 140,
+      "stratified_false_alarm": 0.0714285714285714,
+      "stratified_power": 1.0,
+      "stratified_power_ci95": [
+        0.9732937996305869,
+        0.9999999999999998
+      ],
+      "naive_false_alarm": 0.22857142857142854,
+      "threshold_power": 0.8285714285714286,
+      "threshold_false_alarm": 0.0
+    },
+    {
+      "shared_points": "2",
+      "n_universal": 140,
+      "n_confounded": 140,
+      "stratified_false_alarm": 0.12142857142857144,
+      "stratified_power": 1.0,
+      "stratified_power_ci95": [
+        0.9732937996305869,
+        0.9999999999999998
+      ],
+      "naive_false_alarm": 0.18571428571428572,
+      "threshold_power": 0.8142857142857143,
+      "threshold_false_alarm": 0.0
+    },
+    {
+      "shared_points": "3-4",
+      "n_universal": 140,
+      "n_confounded": 140,
+      "stratified_false_alarm": 0.02857142857142858,
+      "stratified_power": 1.0,
+      "stratified_power_ci95": [
+        0.9732937996305869,
+        0.9999999999999998
+      ],
+      "naive_false_alarm": 0.12857142857142856,
+      "threshold_power": 0.7785714285714286,
+      "threshold_false_alarm": 0.0
+    },
+    {
+      "shared_points": "5-9",
+      "n_universal": 140,
+      "n_confounded": 140,
+      "stratified_false_alarm": 0.1071428571428571,
+      "stratified_power": 1.0,
+      "stratified_power_ci95": [
+        0.9732937996305869,
+        0.9999999999999998
+      ],
+      "naive_false_alarm": 0.23571428571428577,
+      "threshold_power": 0.8714285714285714,
+      "threshold_false_alarm": 0.0
+    },
+    {
+      "shared_points": ">=10",
+      "n_universal": 140,
+      "n_confounded": 140,
+      "stratified_false_alarm": 0.07857142857142863,
+      "stratified_power": 1.0,
+      "stratified_power_ci95": [
+        0.9732937996305869,
+        0.9999999999999998
+      ],
+      "naive_false_alarm": 0.18571428571428572,
+      "threshold_power": 0.8357142857142857,
+      "threshold_false_alarm": 0.0
+    }
+  ]
+}
