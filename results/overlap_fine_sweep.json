@@ -112,5 +112,20 @@
       "threshold_power": 0.8586956521739131,
       "threshold_false_alarm": 0.0
     }
-  ]
+  ],
+  "lowest_bin_split_at_exact_zero": {
+    "min_fold_overlap_exactly_zero": {
+      "n_confounded": 162,
+      "stratified_power": 0.5617283950617284,
+      "n_universal": 187,
+      "stratified_false_alarm": 0.05882352941176472,
+      "threshold_power": 0.8827160493827161
+    },
+    "min_fold_overlap_in_0_to_0.005_exclusive": {
+      "n_confounded": 51,
+      "stratified_power": 1.0,
+      "n_universal": 51,
+      "stratified_false_alarm": 0.11764705882352944
+    }
+  }
 }

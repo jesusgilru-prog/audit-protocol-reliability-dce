@@ -99,6 +99,34 @@ def main(n_scenarios=4000, nperm=99):
             threshold_power=float(c.thr_correct.mean()),
             threshold_false_alarm=float(1 - u.thr_correct.mean()),
         ))
+    # The exactly-zero split of the lowest bin, reported in the manuscript:
+    # scenarios whose worst fold has zero RANGE overlap behave differently
+    # from those with a sliver of it, and the lowest bin mixes both.
+    zc = conf[conf.obs_min_fold_overlap == 0.0]
+    zu = univ[univ.obs_min_fold_overlap == 0.0]
+    pc = conf[(conf.obs_min_fold_overlap > 0) & (conf.obs_min_fold_overlap <= 0.005)]
+    pu = univ[(univ.obs_min_fold_overlap > 0) & (univ.obs_min_fold_overlap <= 0.005)]
+    out["lowest_bin_split_at_exact_zero"] = {
+        "min_fold_overlap_exactly_zero": {
+            "n_confounded": int(len(zc)),
+            "stratified_power": float(zc.strat_correct.mean()) if len(zc) else None,
+            "n_universal": int(len(zu)),
+            "stratified_false_alarm": float(1 - zu.strat_correct.mean()) if len(zu) else None,
+            "threshold_power": float(zc.thr_correct.mean()) if len(zc) else None,
+        },
+        "min_fold_overlap_in_0_to_0.005_exclusive": {
+            "n_confounded": int(len(pc)),
+            "stratified_power": float(pc.strat_correct.mean()) if len(pc) else None,
+            "n_universal": int(len(pu)),
+            "stratified_false_alarm": float(1 - pu.strat_correct.mean()) if len(pu) else None,
+        },
+    }
+    print(f"\nlowest bin split: min-fold exactly 0 -> stratified power "
+          f"{out['lowest_bin_split_at_exact_zero']['min_fold_overlap_exactly_zero']['stratified_power']:.3f} "
+          f"(n={len(zc)}); strictly positive but <=0.005 -> "
+          f"{out['lowest_bin_split_at_exact_zero']['min_fold_overlap_in_0_to_0.005_exclusive']['stratified_power']:.3f} "
+          f"(n={len(pc)})")
+
     path = os.path.join(RESULTS, "overlap_fine_sweep.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=2)
