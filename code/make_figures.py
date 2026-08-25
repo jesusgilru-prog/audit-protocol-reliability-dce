@@ -75,6 +75,55 @@ fig.tight_layout()
 fig.savefig(os.path.join(FIGS, "fig3_accuracy_vs_K_hard_band.png"), bbox_inches="tight")
 plt.close(fig)
 
+# ---- Figure 4: false alarms and power vs covariate-support overlap (v3) ----
+# The headline of the third pass: the permutation rule's validity is
+# conditional on facilities sharing covariate support, and no label
+# permutation scheme survives full separation.
+v3_path = os.path.join(RESULTS, "synth_scenarios_v3_summary.json")
+if os.path.exists(v3_path):
+    with open(v3_path) as f:
+        v3 = json.load(f)
+    b = pd.DataFrame(v3["by_overlap_bin"])
+    x = np.arange(len(b))
+    fig, axes = plt.subplots(1, 2, figsize=(9.6, 3.9), sharex=True)
+
+    ax = axes[0]
+    ax.plot(x, b.threshold_false_alarm, marker="o", color="#C44E52",
+            label="Threshold")
+    ax.plot(x, b.permutation_false_alarm, marker="s", color="#55A868",
+            label="Permutation")
+    ax.plot(x, b.permutation_stratified_false_alarm, marker="^",
+            color="#8172B3", label="Permutation (stratified)")
+    ax.axhline(0.05, color="grey", ls="--", lw=1)
+    ax.text(0.06, 0.028, r"nominal $\alpha$=0.05", fontsize=7.5,
+            color="grey", ha="left")
+    ax.set_ylabel("False-alarm rate\n(universal arm)")
+    ax.set_title("Calibration", fontsize=11)
+    ax.set_ylim(-0.02, max(0.32, float(b.permutation_false_alarm.max()) + 0.05))
+    ax.legend(fontsize=7.5, loc="upper right")
+
+    ax = axes[1]
+    ax.plot(x, b.threshold_power, marker="o", color="#C44E52", label="Threshold")
+    ax.plot(x, b.permutation_power, marker="s", color="#55A868",
+            label="Permutation")
+    ax.plot(x, b.permutation_stratified_power, marker="^", color="#8172B3",
+            label="Permutation (stratified)")
+    ax.set_ylabel("Power\n(confounded arm)")
+    ax.set_title("Detection", fontsize=11)
+    ax.set_ylim(-0.05, 1.05)
+
+    for ax in axes:
+        ax.set_xticks(x)
+        ax.set_xticklabels(b.overlap_bin, fontsize=8)
+        ax.set_xlabel("Covariate-support overlap between facilities")
+        ax.grid(alpha=0.15)
+    fig.suptitle("Validity of each declaration rule vs. how much the facilities' "
+                 "covariate windows overlap", fontsize=11.5)
+    fig.tight_layout()
+    fig.savefig(os.path.join(FIGS, "fig4_overlap_calibration_power.png"),
+                bbox_inches="tight")
+    plt.close(fig)
+
 print("figures saved to", FIGS)
-for fn in os.listdir(FIGS):
+for fn in sorted(os.listdir(FIGS)):
     print(" ", fn)

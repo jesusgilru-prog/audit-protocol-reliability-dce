@@ -1,0 +1,37 @@
+{
+  "n_points": 114,
+  "n_facilities": 4,
+  "per_facility_log10_Re_window": {
+    "Guo2024": {
+      "n": 45,
+      "log10_re_min": 6.796251049057191,
+      "log10_re_max": 7.911378536156601
+    },
+    "Liu2024": {
+      "n": 20,
+      "log10_re_min": 5.465213128704102,
+      "log10_re_max": 6.819017582876779
+    },
+    "Vrancik1968": {
+      "n": 41,
+      "log10_re_min": 4.956903368000571,
+      "log10_re_max": 6.7198164153267905
+    },
+    "Zheng2024": {
+      "n": 8,
+      "log10_re_min": 5.5706209038985355,
+      "log10_re_max": 6.505721342464569
+    }
+  },
+  "pairwise_overlap": {
+    "Guo2024|Liu2024": 0.009307029586072858,
+    "Guo2024|Vrancik1968": 0.0,
+    "Guo2024|Zheng2024": 0.0,
+    "Liu2024|Vrancik1968": 0.6737520591378405,
+    "Liu2024|Zheng2024": 0.6907204623857455,
+    "Vrancik1968|Zheng2024": 0.5304291326133665
+  },
+  "mean_pairwise_overlap": 0.31736811395383757,
+  "mean_pairwise_overlap_via_shared_function": 0.31736811395383757,
+  "note": "Design statistic only (where each facility sits in Reynolds space), not a re-analysis of the windage relationship. Raw data not redistributed here."
+}
