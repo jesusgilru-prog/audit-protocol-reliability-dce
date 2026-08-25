@@ -1,0 +1,73 @@
+{
+  "rng_seed": 20260827,
+  "nperm": 99,
+  "alpha": 0.05,
+  "binning_statistic": "obs_min_fold_overlap",
+  "bins": [
+    {
+      "bin": "0-0.003",
+      "n_universal": 38,
+      "n_confounded": 46,
+      "stratified_false_alarm": 0.07894736842105265,
+      "stratified_power": 0.9782608695652174,
+      "stratified_power_ci95": [
+        0.8866470547848865,
+        0.9961521457419498
+      ],
+      "naive_false_alarm": 0.1578947368421053,
+      "threshold_power": 0.8043478260869565
+    },
+    {
+      "bin": "0.003-0.006",
+      "n_universal": 52,
+      "n_confounded": 62,
+      "stratified_false_alarm": 0.019230769230769273,
+      "stratified_power": 0.9838709677419355,
+      "stratified_power_ci95": [
+        0.9141327973931,
+        0.997147132831378
+      ],
+      "naive_false_alarm": 0.09615384615384615,
+      "threshold_power": 0.7741935483870968
+    },
+    {
+      "bin": "0.006-0.010",
+      "n_universal": 72,
+      "n_confounded": 68,
+      "stratified_false_alarm": 0.05555555555555558,
+      "stratified_power": 0.9852941176470589,
+      "stratified_power_ci95": [
+        0.9212902687183915,
+        0.9973993164238933
+      ],
+      "naive_false_alarm": 0.19444444444444442,
+      "threshold_power": 0.8676470588235294
+    },
+    {
+      "bin": "0.010-0.020",
+      "n_universal": 138,
+      "n_confounded": 128,
+      "stratified_false_alarm": 0.05797101449275366,
+      "stratified_power": 1.0,
+      "stratified_power_ci95": [
+        0.9708630437264916,
+        1.0
+      ],
+      "naive_false_alarm": 0.32608695652173914,
+      "threshold_power": 0.8125
+    },
+    {
+      "bin": "0.020-0.030",
+      "n_universal": 120,
+      "n_confounded": 139,
+      "stratified_false_alarm": 0.07499999999999996,
+      "stratified_power": 0.9928057553956835,
+      "stratified_power_ci95": [
+        0.960376390202378,
+        0.9987289082948406
+      ],
+      "naive_false_alarm": 0.19166666666666665,
+      "threshold_power": 0.7841726618705036
+    }
+  ]
+}

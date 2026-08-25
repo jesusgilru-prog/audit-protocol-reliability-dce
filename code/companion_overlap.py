@@ -23,15 +23,87 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from synth_audit_protocol_v3 import mean_pairwise_overlap, min_fold_overlap  # noqa: E402
+from synth_audit_protocol_v3 import (  # noqa: E402
+    mean_pairwise_overlap, min_fold_overlap, min_fold_point_overlap)
 
 RESULTS = os.path.join(HERE, "..", "results")
 COMPANION_CSV = "/home/jesus/paper_windage_power/data/cross_rotor_dataset_v3.csv"
 
 
+# The four log10(Re) windows exactly as printed in the manuscript's
+# Appendix A. Both overlap statistics are determined by these eight numbers
+# alone, so a reader who has only the paper can reproduce the corpus-level
+# claim without the dataset (Codex, ronda 13, raised the dependence on a
+# non-redistributed file). Recomputing from these rounded windows agrees
+# with the full-data values to within the rounding.
+PUBLISHED_LOG10_RE_WINDOWS = {
+    "Guo2024": (6.80, 7.91),
+    "Liu2024": (5.47, 6.82),
+    "Vrancik1968": (4.96, 6.72),
+    "Zheng2024": (5.57, 6.51),
+}
+
+
+def _iou(a, b):
+    inter = max(0.0, min(a[1], b[1]) - max(a[0], b[0]))
+    union = max(a[1], b[1]) - min(a[0], b[0])
+    return inter / union if union > 0 else 0.0
+
+
+def from_published_windows(windows=None):
+    """Both statistics from the published windows only, no dataset needed."""
+    w = {k: (lo * np.log(10), hi * np.log(10))
+         for k, (lo, hi) in (windows or PUBLISHED_LOG10_RE_WINDOWS).items()}
+    ks = list(w)
+    pairwise = [_iou(w[ks[i]], w[ks[j]])
+                for i in range(len(ks)) for j in range(i + 1, len(ks))]
+    folds = []
+    for k in ks:
+        rest = (min(w[o][0] for o in ks if o != k),
+                max(w[o][1] for o in ks if o != k))
+        folds.append(_iou(w[k], rest))
+    return {"mean_pairwise_overlap": float(np.mean(pairwise)),
+            "min_fold_overlap": float(np.min(folds))}
+
+
+def _worst_fold_counts(d, col="log_re"):
+    """Point counts inside the shared region for the worst fold, so the
+    range-vs-count discrepancy is visible in the artefact itself."""
+    worst, best = None, np.inf
+    for k in d.facility.unique():
+        held = d.loc[d.facility == k, col]
+        rest = d.loc[d.facility != k, col]
+        lo, hi = rest.min(), rest.max()
+        frac = float(((held >= lo) & (held <= hi)).mean())
+        if frac < best:
+            best, worst = frac, k
+    held = d.loc[d.facility == worst, col]
+    rest = d.loc[d.facility != worst, col]
+    lo = max(held.min(), rest.min()); hi = min(held.max(), rest.max())
+    return dict(
+        facility=str(worst),
+        shared_region_log10=[float(lo / np.log(10)), float(hi / np.log(10))],
+        held_out_points_inside=int(((held >= lo) & (held <= hi)).sum()),
+        held_out_points_total=int(len(held)),
+        other_points_inside=int(((rest >= lo) & (rest <= hi)).sum()),
+        other_points_total=int(len(rest)),
+    )
+
+
 def main():
+    pub = from_published_windows()
+    print("From the four published windows in Appendix A alone "
+          "(no dataset required):")
+    print(f"  mean pairwise overlap = {pub['mean_pairwise_overlap']:.3f}")
+    print(f"  min fold overlap      = {pub['min_fold_overlap']:.4f}\n")
+
     if not os.path.exists(COMPANION_CSV):
-        print(f"companion dataset not available at {COMPANION_CSV}; skipping")
+        print(f"companion dataset not available at {COMPANION_CSV}; "
+              f"reporting the published-window values only")
+        with open(os.path.join(RESULTS, "companion_overlap.json"), "w") as f:
+            json.dump({"from_published_windows": pub,
+                       "note": "dataset not present; published-window "
+                               "recomputation only"}, f, indent=2)
         return
     d = pd.read_csv(COMPANION_CSV).dropna(subset=["Re_Omega", "Cp"])
     d = d.rename(columns={"source": "facility"})
@@ -74,7 +146,10 @@ def main():
         mean_pairwise_overlap_via_shared_function=mean_pairwise_overlap(d),
         per_fold_overlap=fold,
         min_fold_overlap=min_fold_overlap(d),
+        min_fold_point_overlap=min_fold_point_overlap(d),
+        points_in_shared_region_worst_fold=_worst_fold_counts(d),
         source_file=COMPANION_CSV,
+        from_published_windows=pub,
         note=("Design statistic only (where each facility sits in Reynolds "
               "space), not a re-analysis of the windage relationship. Raw "
               "data not redistributed here."),
@@ -91,8 +166,13 @@ def main():
     print("\nper-fold overlap (held-out facility vs. union of the rest):")
     for k, v in fold.items():
         print(f"  {k:<14} {v:.4f}")
-    print(f"\nMIN fold overlap = {out['min_fold_overlap']:.4f}  "
-          f"<- the statistic the declaration rule keys on")
+    print(f"\nMIN fold overlap (range)  = {out['min_fold_overlap']:.4f}")
+    print(f"MIN fold overlap (points) = {out['min_fold_point_overlap']:.4f}")
+    w = out["points_in_shared_region_worst_fold"]
+    print(f"  worst fold: {w['facility']}, shared region log10Re "
+          f"[{w['shared_region_log10'][0]:.3f}, {w['shared_region_log10'][1]:.3f}] "
+          f"contains {w['held_out_points_inside']}/{w['held_out_points_total']} "
+          f"held-out points and {w['other_points_inside']}/{w['other_points_total']} others")
 
     path = os.path.join(RESULTS, "companion_overlap.json")
     with open(path, "w") as f:

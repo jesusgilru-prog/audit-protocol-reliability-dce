@@ -40,6 +40,22 @@
     "Zheng2024": 0.31650306242027276
   },
   "min_fold_overlap": 0.007705779376645486,
+  "min_fold_point_overlap": 0.022222222222222223,
+  "points_in_shared_region_worst_fold": {
+    "facility": "Guo2024",
+    "shared_region_log10": [
+      6.796251049057191,
+      6.819017582876779
+    ],
+    "held_out_points_inside": 1,
+    "held_out_points_total": 45,
+    "other_points_inside": 1,
+    "other_points_total": 69
+  },
   "source_file": "/home/jesus/paper_windage_power/data/cross_rotor_dataset_v3.csv",
+  "from_published_windows": {
+    "mean_pairwise_overlap": 0.31843782290856143,
+    "min_fold_overlap": 0.006779661016949384
+  },
   "note": "Design statistic only (where each facility sits in Reynolds space), not a re-analysis of the windage relationship. Raw data not redistributed here."
 }

@@ -138,6 +138,34 @@ def min_fold_overlap(df, col="log_re"):
     return float(np.min(vals))
 
 
+def min_fold_point_overlap(df, col="log_re"):
+    """MINIMUM over folds of the FRACTION OF POINTS of the held-out facility
+    that fall inside the covariate range spanned by the other facilities.
+
+    Added after external review (Codex, ronda 13, 2026-08-25) exposed that
+    the range-based statistics above can be inflated by a single boundary
+    observation. In the companion corpus the minimum fold overlap is
+    positive (0.008) purely because one point of the largest facility and
+    one point of another lie within 0.023 decades of each other; on that
+    fold the stratified permutation has essentially no admissible label
+    swaps despite the range statistic being non-zero.
+
+    Counting points instead of comparing endpoints measures the support
+    that a permutation can actually use, and is the check we recommend
+    alongside the range statistic.
+    """
+    fac = df.facility.unique()
+    if len(fac) < 2:
+        return np.nan
+    vals = []
+    for k in fac:
+        held = df.loc[df.facility == k, col]
+        rest = df.loc[df.facility != k, col]
+        lo, hi = rest.min(), rest.max()
+        vals.append(float(((held >= lo) & (held <= hi)).mean()))
+    return float(np.min(vals))
+
+
 def _lofo_r2_fast(X, y, g):
     """Pooled LOFO R^2 via closed-form downdating of the normal equations.
     Identical definition to the first two passes."""
