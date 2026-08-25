@@ -23,7 +23,7 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from synth_audit_protocol_v3 import mean_pairwise_overlap  # noqa: E402
+from synth_audit_protocol_v3 import mean_pairwise_overlap, min_fold_overlap  # noqa: E402
 
 RESULTS = os.path.join(HERE, "..", "results")
 COMPANION_CSV = "/home/jesus/paper_windage_power/data/cross_rotor_dataset_v3.csv"
@@ -55,6 +55,16 @@ def main():
             union = max(a.max(), b.max()) - min(a.min(), b.min())
             pairwise[f"{facs[i]}|{facs[j]}"] = float(inter / union) if union > 0 else 0.0
 
+    # Per-fold overlap: held-out facility vs. the union of the others. This
+    # is the quantity the declaration rule keys on (see min_fold_overlap).
+    fold = {}
+    for k in facs:
+        held = np.log(d.loc[d.facility == k, "Re_Omega"])
+        rest = np.log(d.loc[d.facility != k, "Re_Omega"])
+        inter = max(0.0, min(held.max(), rest.max()) - max(held.min(), rest.min()))
+        union = max(held.max(), rest.max()) - min(held.min(), rest.min())
+        fold[k] = float(inter / union) if union > 0 else 0.0
+
     out = dict(
         n_points=int(len(d)),
         n_facilities=len(facs),
@@ -62,6 +72,9 @@ def main():
         pairwise_overlap=pairwise,
         mean_pairwise_overlap=float(np.mean(list(pairwise.values()))),
         mean_pairwise_overlap_via_shared_function=mean_pairwise_overlap(d),
+        per_fold_overlap=fold,
+        min_fold_overlap=min_fold_overlap(d),
+        source_file=COMPANION_CSV,
         note=("Design statistic only (where each facility sits in Reynolds "
               "space), not a re-analysis of the windage relationship. Raw "
               "data not redistributed here."),
@@ -75,6 +88,11 @@ def main():
     for k, v in pairwise.items():
         print(f"  {k:<32} {v:.3f}")
     print(f"\nmean pairwise overlap = {out['mean_pairwise_overlap']:.3f}")
+    print("\nper-fold overlap (held-out facility vs. union of the rest):")
+    for k, v in fold.items():
+        print(f"  {k:<14} {v:.4f}")
+    print(f"\nMIN fold overlap = {out['min_fold_overlap']:.4f}  "
+          f"<- the statistic the declaration rule keys on")
 
     path = os.path.join(RESULTS, "companion_overlap.json")
     with open(path, "w") as f:

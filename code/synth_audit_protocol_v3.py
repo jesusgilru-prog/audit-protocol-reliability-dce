@@ -107,6 +107,37 @@ def mean_pairwise_overlap(df, col="log_re"):
     return float(np.mean(vals))
 
 
+def min_fold_overlap(df, col="log_re"):
+    """MINIMUM over leave-one-facility-out folds of the overlap between the
+    held-out facility's covariate range and the union of the others'.
+
+    Added after external review (Codex, ronda 11, 2026-08-25), which
+    correctly noted that a MEAN pairwise overlap can look adequate while a
+    single fold is degenerate -- exactly the situation in the companion
+    corpus, where three facilities overlap well and the largest is disjoint
+    from all of them. The fold is the unit that matters: LOFO predicts one
+    held-out facility at a time, and a stratified permutation has
+    admissible label swaps for that fold only if the held-out facility
+    shares covariate range with the rest. The binding constraint is
+    therefore the minimum across folds, not the average across pairs.
+
+    Same intersection-over-union scale as mean_pairwise_overlap, so the two
+    are directly comparable, and equally computable from a real design
+    matrix.
+    """
+    fac = df.facility.unique()
+    if len(fac) < 2:
+        return np.nan
+    vals = []
+    for k in fac:
+        held = df.loc[df.facility == k, col]
+        rest = df.loc[df.facility != k, col]
+        inter = max(0.0, min(held.max(), rest.max()) - max(held.min(), rest.min()))
+        union = max(held.max(), rest.max()) - min(held.min(), rest.min())
+        vals.append(inter / union if union > 0 else 0.0)
+    return float(np.min(vals))
+
+
 def _lofo_r2_fast(X, y, g):
     """Pooled LOFO R^2 via closed-form downdating of the normal equations.
     Identical definition to the first two passes."""
@@ -184,6 +215,7 @@ def run_scenario(K, n_per_facility, sigma, heterogeneity, is_universal,
         heterogeneity=heterogeneity, is_universal=is_universal,
         overlap=overlap,
         obs_overlap=mean_pairwise_overlap(df),
+        obs_min_fold_overlap=min_fold_overlap(df),
         r2_lofo=r2_lofo, p_naive=p_naive, p_strat=p_strat,
         thr_says_universal=thr_says_universal,
         perm_says_universal=perm_says_universal,
@@ -226,11 +258,17 @@ def main(n_scenarios=6000, nperm=99):
 
     bins = [0, 0.2, 0.4, 0.6, 0.8, 1.0]
     labels = ["0.0-0.2", "0.2-0.4", "0.4-0.6", "0.6-0.8", "0.8-1.0"]
-    df["ov_bin"] = pd.cut(df.overlap, bins=bins, labels=labels,
-                           include_lowest=True)
+    # Bin on the OBSERVABLE decision statistic (minimum fold overlap),
+    # not the latent design knob: the table is meant to be a lookup a
+    # practitioner can enter with a number computed from their own
+    # design matrix (Codex, ronda 11).
+    df["ov_bin"] = pd.cut(df.obs_min_fold_overlap, bins=bins,
+                           labels=labels, include_lowest=True)
 
     summary = {"n_scenarios": int(len(df)), "rng_seed": RNG_SEED,
-               "nperm": nperm, "alpha": ALPHA, "by_overlap_bin": []}
+               "nperm": nperm, "alpha": ALPHA,
+               "binning_statistic": "obs_min_fold_overlap",
+               "by_overlap_bin": []}
 
     print("\n=== FALSE ALARM RATE (universal arm; rejection = error) ===")
     print(f"{'overlap':>10} {'n':>5} {'threshold':>10} {'permutation':>12} "

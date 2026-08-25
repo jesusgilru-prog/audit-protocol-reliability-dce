@@ -3,180 +3,181 @@
   "rng_seed": 20260825,
   "nperm": 99,
   "alpha": 0.05,
+  "binning_statistic": "obs_min_fold_overlap",
   "by_overlap_bin": [
     {
       "overlap_bin": "0.0-0.2",
-      "n_universal": 574,
-      "n_confounded": 604,
+      "n_universal": 520,
+      "n_confounded": 549,
       "threshold_false_alarm": 0.0,
       "threshold_false_alarm_ci95": [
         0.0,
-        0.006647946010198172
+        0.0073332470273396585
       ],
-      "threshold_power": 0.8261589403973509,
+      "threshold_power": 0.8178506375227687,
       "threshold_power_ci95": [
-        0.7938998879995157,
-        0.8542954502461191
+        0.7833927888867505,
+        0.8478912699182405
       ],
-      "permutation_false_alarm": 0.17247386759581884,
+      "permutation_false_alarm": 0.17500000000000004,
       "permutation_false_alarm_ci95": [
-        0.14377115435785195,
-        0.20553133292408968
+        0.14475789059459201,
+        0.21000871997317874
       ],
       "permutation_power": 1.0,
       "permutation_power_ci95": [
-        0.9936801631988922,
+        0.9930514277476791,
         1.0
       ],
-      "permutation_stratified_false_alarm": 0.05574912891986061,
+      "permutation_stratified_false_alarm": 0.06153846153846154,
       "permutation_stratified_false_alarm_ci95": [
-        0.03976369058057905,
-        0.07764127887099075
+        0.04392487846186187,
+        0.0855827381621129
       ],
-      "permutation_stratified_power": 0.9784768211920529,
+      "permutation_stratified_power": 0.97632058287796,
       "permutation_stratified_power_ci95": [
-        0.9635265149857936,
-        0.9873793365522191
+        0.9599113537874027,
+        0.986110315997727
       ]
     },
     {
       "overlap_bin": "0.2-0.4",
-      "n_universal": 582,
-      "n_confounded": 624,
+      "n_universal": 598,
+      "n_confounded": 658,
       "threshold_false_alarm": 0.0,
       "threshold_false_alarm_ci95": [
-        4.3083715219253044e-19,
-        0.006557164507317437
+        0.0,
+        0.006382841800598862
       ],
-      "threshold_power": 0.8397435897435898,
+      "threshold_power": 0.8404255319148937,
       "threshold_power_ci95": [
-        0.8088948045674917,
-        0.8664349208641806
+        0.810479868807239,
+        0.866419400691942
       ],
-      "permutation_false_alarm": 0.1254295532646048,
+      "permutation_false_alarm": 0.1270903010033445,
       "permutation_false_alarm_ci95": [
-        0.10095365384151922,
-        0.15481769276533716
+        0.10275409815522192,
+        0.1561869510806762
       ],
       "permutation_power": 1.0,
       "permutation_power_ci95": [
-        0.9938814827107632,
-        1.0000000000000002
+        0.9941958020769219,
+        1.0
       ],
-      "permutation_stratified_false_alarm": 0.061855670103092786,
+      "permutation_stratified_false_alarm": 0.04849498327759194,
       "permutation_stratified_false_alarm_ci95": [
-        0.04501157261222795,
-        0.0844457364921224
+        0.03397485313407903,
+        0.06877888360893666
       ],
       "permutation_stratified_power": 1.0,
       "permutation_stratified_power_ci95": [
-        0.9938814827107632,
-        1.0000000000000002
+        0.9941958020769219,
+        1.0
       ]
     },
     {
       "overlap_bin": "0.4-0.6",
-      "n_universal": 564,
-      "n_confounded": 596,
+      "n_universal": 691,
+      "n_confounded": 704,
       "threshold_false_alarm": 0.0,
       "threshold_false_alarm_ci95": [
         0.0,
-        0.006765019991094263
+        0.005528540031583558
       ],
-      "threshold_power": 0.8741610738255033,
+      "threshold_power": 0.8849431818181818,
       "threshold_power_ci95": [
-        0.8451149920775388,
-        0.8984148080747365
+        0.8592546211185147,
+        0.9064535657161531
       ],
-      "permutation_false_alarm": 0.10460992907801414,
+      "permutation_false_alarm": 0.1085383502170767,
       "permutation_false_alarm_ci95": [
-        0.08197049170884055,
-        0.1325990099153226
+        0.08747298880483301,
+        0.1339321344326297
       ],
       "permutation_power": 1.0,
       "permutation_power_ci95": [
-        0.993595876436673,
+        0.9945729954457679,
         1.0
       ],
-      "permutation_stratified_false_alarm": 0.05319148936170215,
+      "permutation_stratified_false_alarm": 0.06367583212735162,
       "permutation_stratified_false_alarm_ci95": [
-        0.03751021419166418,
-        0.07491810154505835
+        0.04777312344389222,
+        0.08440301206847375
       ],
       "permutation_stratified_power": 1.0,
       "permutation_stratified_power_ci95": [
-        0.993595876436673,
+        0.9945729954457679,
         1.0
       ]
     },
     {
       "overlap_bin": "0.6-0.8",
-      "n_universal": 613,
-      "n_confounded": 621,
+      "n_universal": 746,
+      "n_confounded": 756,
       "threshold_false_alarm": 0.0,
       "threshold_false_alarm_ci95": [
-        4.30980066096243e-19,
-        0.006227627481522404
+        0.0,
+        0.00512302804213539
       ],
-      "threshold_power": 0.895330112721417,
+      "threshold_power": 0.8822751322751323,
       "threshold_power_ci95": [
-        0.8687739236997589,
-        0.9170254067843253
+        0.8573459955965619,
+        0.9033390042678576
       ],
-      "permutation_false_alarm": 0.07014681892332786,
+      "permutation_false_alarm": 0.05630026809651478,
       "permutation_false_alarm_ci95": [
-        0.05249225997138964,
-        0.093155308842252
+        0.04191933950728673,
+        0.07522736902340177
       ],
       "permutation_power": 1.0,
       "permutation_power_ci95": [
-        0.9938521063760006,
-        0.9999999999999998
+        0.9949443942863341,
+        1.0
       ],
-      "permutation_stratified_false_alarm": 0.05220228384991843,
+      "permutation_stratified_false_alarm": 0.0442359249329759,
       "permutation_stratified_false_alarm_ci95": [
-        0.03721735362307421,
-        0.0727646488032811
+        0.03166951590047245,
+        0.06147211823981181
       ],
       "permutation_stratified_power": 1.0,
       "permutation_stratified_power_ci95": [
-        0.9938521063760006,
-        0.9999999999999998
+        0.9949443942863341,
+        1.0
       ]
     },
     {
       "overlap_bin": "0.8-1.0",
-      "n_universal": 591,
-      "n_confounded": 631,
+      "n_universal": 369,
+      "n_confounded": 409,
       "threshold_false_alarm": 0.0,
       "threshold_false_alarm_ci95": [
-        4.308801778606904e-19,
-        0.006457954071173902
+        0.0,
+        0.010303196519090837
       ],
-      "threshold_power": 0.8700475435816165,
+      "threshold_power": 0.8728606356968215,
       "threshold_power_ci95": [
-        0.8415562234806365,
-        0.8940605096601342
+        0.8370701408307174,
+        0.9017122500445847
       ],
-      "permutation_false_alarm": 0.05922165820642977,
+      "permutation_false_alarm": 0.0677506775067751,
       "permutation_false_alarm_ci95": [
-        0.042887358309413835,
-        0.08124901067718784
+        0.04630848649304593,
+        0.09809996795028733
       ],
-      "permutation_power": 0.9984152139461173,
+      "permutation_power": 0.9975550122249389,
       "permutation_power_ci95": [
-        0.9910783633675213,
-        0.9997201915479921
+        0.9862823311223912,
+        0.9995682691603891
       ],
-      "permutation_stratified_false_alarm": 0.055837563451776595,
+      "permutation_stratified_false_alarm": 0.0677506775067751,
       "permutation_stratified_false_alarm_ci95": [
-        0.040032722543314886,
-        0.07737916559097664
+        0.04630848649304593,
+        0.09809996795028733
       ],
       "permutation_stratified_power": 1.0,
       "permutation_stratified_power_ci95": [
-        0.9939489477769298,
-        1.0
+        0.9906950749770443,
+        0.9999999999999998
       ]
     }
   ],

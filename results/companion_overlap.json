@@ -33,5 +33,13 @@
   },
   "mean_pairwise_overlap": 0.31736811395383757,
   "mean_pairwise_overlap_via_shared_function": 0.31736811395383757,
+  "per_fold_overlap": {
+    "Guo2024": 0.007705779376645486,
+    "Liu2024": 0.4582216390796829,
+    "Vrancik1968": 0.4246450605322642,
+    "Zheng2024": 0.31650306242027276
+  },
+  "min_fold_overlap": 0.007705779376645486,
+  "source_file": "/home/jesus/paper_windage_power/data/cross_rotor_dataset_v3.csv",
   "note": "Design statistic only (where each facility sits in Reynolds space), not a re-analysis of the windage relationship. Raw data not redistributed here."
 }

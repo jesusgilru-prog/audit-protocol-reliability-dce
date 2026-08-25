@@ -115,10 +115,10 @@ if os.path.exists(v3_path):
     for ax in axes:
         ax.set_xticks(x)
         ax.set_xticklabels(b.overlap_bin, fontsize=8)
-        ax.set_xlabel("Covariate-support overlap between facilities")
+        ax.set_xlabel("Minimum fold overlap")
         ax.grid(alpha=0.15)
-    fig.suptitle("Validity of each declaration rule vs. how much the facilities' "
-                 "covariate windows overlap", fontsize=11.5)
+    fig.suptitle("Validity of each declaration rule vs. the minimum covariate-support\n"
+                 "overlap across leave-one-facility-out folds", fontsize=11.5)
     fig.tight_layout()
     fig.savefig(os.path.join(FIGS, "fig4_overlap_calibration_power.png"),
                 bbox_inches="tight")
