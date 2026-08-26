@@ -94,17 +94,55 @@ Facility sizes are either equal or drawn from a log-normal distribution around $
 
 \subsection{Audit protocol: LOFO and facility-level bootstrap}
 
-For each scenario we fit a single pooled ordinary-least-squares model in log space on all points, ignoring facility identity, then perform leave-one-facility-out cross-validation: for each held-out facility, we refit on the remaining $K-1$ facilities and predict the held-out points, pooling residuals across all folds to compute an overall LOFO R\textsuperscript{2} in log space --- the same metric used in the companion manuscripts \citep{gilruiz2026paper1,gilruiz2026paper2}. The protocol declares the law ``universal'' if pooled LOFO R\textsuperscript{2} $> 0$; this threshold means the pooled model out-predicts a constant (the pooled mean), the weakest non-trivial bar for generalization. We adopt it to match the companion manuscripts' own criterion, enabling direct comparison with their reported numbers, rather than because it is the most discriminating choice available --- Section~\ref{sec:results-v1} shows a stricter threshold would in fact detect confounding more reliably, at negligible cost to detecting universality.
+For each scenario we fit a single pooled ordinary-least-squares model in log space on all points, ignoring facility identity, then perform leave-one-facility-out cross-validation: for each held-out facility $k$ we refit on the remaining $K-1$ facilities, obtaining $\hat\beta_{-k}$, and predict the held-out points. Pooling residuals across all folds gives
+\begin{equation}
+R^{2}_{\mathrm{LOFO}}
+= 1-\frac{\sum_{k=1}^{K}\sum_{i\in\mathcal{F}_k}\bigl(y_i-x_i^{\top}\hat\beta_{-k}\bigr)^{2}}
+        {\sum_{i=1}^{N}\bigl(y_i-\bar{y}\bigr)^{2}},
+\label{eq:lofo}
+\end{equation}
+where $\mathcal{F}_k$ indexes the points of facility $k$, $y_i=\log C_{p,i}$ and $\bar y$ is the pooled mean. This is the same metric used in the companion manuscripts --- the same metric used in the companion manuscripts \citep{gilruiz2026paper1,gilruiz2026paper2}. The protocol declares the law universal if $R^{2}_{\mathrm{LOFO}}>0$; this threshold means the pooled model out-predicts a constant (the pooled mean), the weakest non-trivial bar for generalization. We adopt it to match the companion manuscripts' own criterion, enabling direct comparison with their reported numbers, rather than because it is the most discriminating choice available --- Section~\ref{sec:results-v1} shows a stricter threshold would in fact detect confounding more reliably, at negligible cost to detecting universality.
 
 Separately, we implement facility-level bootstrap: $B=200$ resamples of the $K$ facilities with replacement, refitting the pooled model on each resample and computing a percentile 95\% confidence interval for the Reynolds-like exponent $a$. We report whether this interval excludes zero (the coefficient ``survives'' bootstrap, the same language and criterion the companion manuscripts use) as a second, complementary diagnostic to the LOFO verdict, not folded into a single binary label. A scenario is scored \emph{correct} (for the LOFO verdict) if the declared universality matches ground truth.
 
-\paragraph{Facility-label permutation test.} As an alternative declaration rule computed from the same pooled fit at no extra data-collection cost, we additionally implement a facility-label permutation test: the observed LOFO R\textsuperscript{2} is compared against its own null distribution, obtained by randomly reassigning facility labels to points ($n_{\text{perm}}=99$ permutations) and recomputing LOFO R\textsuperscript{2} on each shuffle, closed-form via normal-equation downdating rather than refitting from scratch. The protocol declares the law confounded if the observed LOFO R\textsuperscript{2} falls below the $\alpha=0.05$ quantile of the permutation null (i.e., the observed drop under leave-one-facility-out is larger than chance facility reassignment would produce), and universal otherwise. Unlike the plain threshold rule, this test is calibrated against the scenario's own noise level rather than against a fixed value of zero. Section~\ref{sec:results-v1} reports it head-to-head against the threshold rule.
+\paragraph{Facility-label permutation test.} As an alternative declaration rule computed from the same pooled fit at no extra data-collection cost, we additionally implement a facility-label permutation test: the observed $R^{2}_{\mathrm{LOFO}}$ is compared against its own null distribution, obtained by randomly reassigning facility labels to points and recomputing \eqref{eq:lofo} on each shuffle, closed-form via normal-equation downdating rather than refitting from scratch. Writing $g$ for the vector of facility labels and $g^{(b)}$ for its $b$-th permutation,
+\begin{equation}
+p \;=\; \frac{1+\bigl|\{\,b\le B:\;R^{2}_{\mathrm{LOFO}}(g^{(b)})\le R^{2}_{\mathrm{LOFO}}(g)\,\}\bigr|}{1+B},
+\qquad B=99,
+\label{eq:perm}
+\end{equation}
+and the protocol declares the law confounded when $p\le\alpha=0.05$, universal otherwise. The one-sided form is deliberate: confounding can only make the held-out fit worse than chance relabelling, never better. Unlike the plain threshold rule, this test is calibrated against the scenario's own noise level rather than against a fixed value of zero. Section~\ref{sec:results-v1} reports it head-to-head against the threshold rule.
 
-\paragraph{Covariate-support overlap, and a stratified permutation variant.} The permutation null above assumes points are exchangeable across facility labels. That assumption is substantive, not technical: it holds only if the facilities cover comparable regions of covariate space. When they do not, leave-one-facility-out is an \emph{extrapolation} task while the permuted pseudo-folds are \emph{interpolation}, so the observed LOFO R\textsuperscript{2} can fall in the lower tail of the permutation null even under a genuinely universal law. Both passes above draw every facility's covariates from the same uniform range, i.e.\ they sit at complete overlap and cannot detect this failure mode. A third pass (Section~\ref{sec:results-v3}) therefore adds an overlap parameter controlling each facility's $\log Re$ window, interpolating between complete sharing of the range and a disjoint tiling of it, and evaluates two further quantities:
+\paragraph{Covariate-support overlap, and a stratified permutation variant.} The permutation null above assumes points are exchangeable across facility labels. That assumption is substantive, not technical: it holds only if the facilities cover comparable regions of covariate space. When they do not, leave-one-facility-out is an \emph{extrapolation} task while the permuted pseudo-folds are \emph{interpolation}, so the observed LOFO R\textsuperscript{2} can fall in the lower tail of the permutation null even under a genuinely universal law (Figure~\ref{fig:schematic}). Both passes above draw every facility's covariates from the same uniform range, i.e.\ they sit at complete overlap and cannot detect this failure mode.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/figA_schematic_support.png}
+\caption{Why separated support invalidates the permutation null. \emph{Top}: when the facilities share covariate range, predicting a held-out facility (red) and predicting a permuted pseudo-fold are statistically the same problem, so the null matches the observed statistic. \emph{Bottom}: when each facility occupies its own window, leave-one-facility-out becomes extrapolation, while a permuted pseudo-fold still draws points from the whole range and remains interpolation. The observed LOFO R\textsuperscript{2} is then compared against a null generated by an easier task, and a universal law can be rejected on that mismatch alone}
+\label{fig:schematic}
+\end{figure} A third pass (Section~\ref{sec:results-v3}) therefore adds an overlap parameter controlling each facility's $\log Re$ window, interpolating between complete sharing of the range and a disjoint tiling of it, and evaluates two further quantities:
 
 \begin{itemize}
-  \item \textbf{Two observable overlap statistics}, both computable from a design matrix alone and so available to a practitioner before any rule is chosen. The \emph{mean pairwise overlap} is the mean over facility pairs of $|{\cap}|/|{\cup}|$ of their covariate ranges; across the third pass it tracks the latent design parameter closely (Pearson $r=0.995$). The \emph{minimum fold overlap} is the smallest, over leave-one-facility-out folds, of the same quantity computed between the held-out facility's range and the union of the others'. A third, \emph{minimum fold point overlap}, replaces the range comparison by the fraction of the held-out facility's points that fall inside the range spanned by the others, again minimised over folds. The decision rule of Section~\ref{sec:results-v3} keys on the last two, because a permutation test needs admissible label swaps in \emph{every} fold: one separated facility removes them from its own, and a range comparison can be lifted off zero by a single boundary observation without any usable support behind it. Results are binned on the range-based minimum, with the point-based statistic used as the check that catches that failure. The mean is reported alongside only to show how far the three can diverge on a real corpus.
-  \item \textbf{A stratified permutation variant}: identical to the test above, except facility labels are permuted only \emph{within} equal-count strata of $\log Re$ ($K$ strata). The null then holds the covariate--facility association fixed and tests only for a coefficient difference beyond what design separation alone produces.
+  \item \textbf{Two observable overlap statistics}, both computable from a design matrix alone and so available to a practitioner before any rule is chosen. Write $I_k=[\min_{i\in\mathcal{F}_k}\log Re_i,\ \max_{i\in\mathcal{F}_k}\log Re_i]$ for facility $k$'s covariate range and $I_{-k}$ for the range spanned by all the others. The \emph{mean pairwise overlap} and the \emph{minimum fold overlap} are
+\begin{equation}
+\bar{o}=\binom{K}{2}^{-1}\!\!\sum_{k<l}\frac{|I_k\cap I_l|}{|I_k\cup I_l|},
+\qquad
+o_{\min}=\min_{k}\frac{|I_k\cap I_{-k}|}{|I_k\cup I_{-k}|}.
+\label{eq:overlap}
+\end{equation}
+Across the third pass $\bar{o}$ tracks the latent design parameter closely (Pearson $r=0.995$). A third statistic replaces the range comparison by a point count, since \eqref{eq:overlap} can be lifted off zero by a single boundary observation. Writing $m_{\min}$ for the smallest number of held-out points falling inside the others' range, and $\rho_{\min}$ for the same quantity as a fraction,
+\begin{equation}
+m_{\min}=\min_{k}\;\bigl|\{\,i\in\mathcal{F}_k:\ \log Re_i\in I_{-k}\,\}\bigr|,
+\qquad
+\rho_{\min}=\min_{k}\;\frac{\bigl|\{\,i\in\mathcal{F}_k:\ \log Re_i\in I_{-k}\,\}\bigr|}{|\mathcal{F}_k|}.
+\label{eq:points}
+\end{equation} The decision rule of Section~\ref{sec:results-v3} keys on the last two, because a permutation test needs admissible label swaps in \emph{every} fold: one separated facility removes them from its own, and a range comparison can be lifted off zero by a single boundary observation without any usable support behind it. Results are binned on the range-based minimum, with the point-based statistic used as the check that catches that failure. The mean is reported alongside only to show how far the three can diverge on a real corpus.
+  \item \textbf{A stratified permutation variant}: identical to \eqref{eq:perm}, except that permutations are drawn from
+\begin{equation}
+\mathcal{G}_{\mathrm{strat}}=\bigl\{\,\pi:\;s(\pi(i))=s(i)\ \ \text{for all } i\,\bigr\},
+\label{eq:strat}
+\end{equation}
+where $s(i)$ is the equal-count stratum of $\log Re_i$ ($K$ strata). Labels are then exchanged only between points at comparable operating conditions, so the null holds the covariate--facility association fixed and tests only for a coefficient difference beyond what design separation alone produces.
 \end{itemize}
 
 \subsection{Meta-model}
@@ -253,7 +291,7 @@ $K$ bin & $n$ & Threshold rule & Permutation rule \\
 \subsection{Covariate-support overlap decides which rule is valid (third pass)}
 \label{sec:results-v3}
 
-The permutation rule's advantage in Sections~\ref{sec:results-v1}--\ref{sec:results-v2} was established on scenarios where all facilities share complete covariate support. Table~\ref{tab:overlap} and Figure~\ref{fig:overlap} report the third pass (6,000 scenarios, overlap sampled uniformly), scoring all three declaration rules on the universal arm (where any rejection is a false alarm) and the confounded arm (where any rejection is a correct detection).
+The permutation rule's advantage in Sections~\ref{sec:results-v1}--\ref{sec:results-v2} was established on scenarios where all facilities share complete covariate support. Table~\ref{tab:overlap} and Figures~\ref{fig:overlap} and \ref{fig:surface} report the third pass (6,000 scenarios, overlap sampled uniformly), scoring all three declaration rules on the universal arm (where any rejection is a false alarm) and the confounded arm (where any rejection is a correct detection).
 
 \paragraph{The binding statistic is the worst fold, not the average pair.} We index these results by the \emph{minimum} over LOFO folds of the overlap between the held-out facility and the union of the others, rather than by the mean over facility pairs. The distinction matters. LOFO predicts one held-out facility at a time, and a stratified permutation has admissible label swaps for a fold only if the held-out facility shares covariate range with the rest, so a single separated facility disables the test for its own fold no matter how well the remaining facilities overlap each other. A corpus can therefore have a comfortable mean pairwise overlap and a marginal minimum, and the companion corpus below is exactly that case. Both statistics are computable from a design matrix alone; we use the minimum because it is the one that binds.
 
@@ -262,6 +300,13 @@ The naive permutation test is calibrated only where the folds overlap well. Its 
 Stratifying the permutation repairs the problem at negligible cost. Restricting label swaps to within-stratum swaps holds the false-alarm rate at 4.4--6.8\% across the whole range, every bin's 95\% interval in Table~\ref{tab:overlap} covering the nominal 0.05, while costing little power: 97.6\% in the lowest bin and 100\% elsewhere, against the threshold rule's 81.8--88.5\%. Across the bins of Table~\ref{tab:overlap} the stratified test is therefore the best of the three on both criteria at once, and it is the rule we recommend wherever it is admissible.
 
 \paragraph{Where the advantage ends.} The lowest bin of Table~\ref{tab:overlap} still shows the stratified test working, so the boundary lies inside it. Two further batches locate it (\texttt{results/overlap\_fine\_sweep.json}, \texttt{results/overlap\_transition.json}). The transition is abrupt rather than gradual, and it sits at zero. Where every fold retains \emph{some} positive overlap the stratified test keeps full power --- 98.4\% at minimum fold overlap 0.003--0.006, 98.5\% at 0.006--0.010 and 100.0\% at 0.010--0.020 --- whereas once at least one fold is exactly disjoint its power falls to 56.2\% ($n{=}162$; \texttt{lowest\_bin\_split\_at\_exact\_zero} in \texttt{results/overlap\_fine\_sweep.json}), because that fold admits no label swap and contributes nothing while the remaining folds carry the test alone. When \emph{all} facilities are mutually disjoint, the dedicated batch of 150 scenarios per arm at overlap $=0$ (\texttt{degenerate\_corner\_overlap\_zero} in \texttt{results/synth\_scenarios\_v3\_summary.json}) returns 0.0\% false alarms and 0.0\% power: with facility identity a deterministic function of the covariates, every stratum contains a single facility and the test cannot reject anything. The naive test in that same corner reaches a 20.0\% false-alarm rate; the threshold rule holds 0.0\% false alarms at 85.3\% power. The inertia at the limit is not a defect of the estimator but an identifiability property: under perfect separation, ``the facilities follow different laws'' and ``the facilities were run at different conditions'' are not distinguishable by any argument based on permuting facility labels.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.98\textwidth]{figures/figC_surface_detection.png}
+\caption{Detection of genuine confounding as a joint function of covariate-support overlap and confounding strength $h$, confounded arm of the third pass. The stratified permutation test is a near-flat plateau: it detects almost everything except at the lowest overlap. The threshold rule sags along both axes at once, worst where the confounding is weak, and never reaches the plateau anywhere in the domain}
+\label{fig:surface}
+\end{figure}
 
 \paragraph{How much shared support is enough.} Because the boundary sits at exactly zero, the range statistic is fragile there: a single observation lifts it off zero. Whether that matters is an empirical question. Table~\ref{tab:points} bins scenarios by the number of points of the held-out facility that actually fall inside the range spanned by the others, on the fold where that count is smallest, with 140 scenarios per arm per bin. One point is enough. Power is 60.7\% when no point is shared and 100.0\% (95\% CI [0.973, 1.000]) from one point onwards, flat across every larger bin. Calibration is approximately nominal but noisy over the same range, between 2.9\% and 12.1\%, with two of six bins' intervals excluding 0.05 and no monotone trend; we read that as sampling noise around a mildly anti-conservative test rather than as structure.
 
@@ -311,7 +356,14 @@ $\geq$10 & 0.079 & 1.000 & [0.973, 1.000] & 0.836 \\
 \end{tabular}
 \end{table}
 
-\paragraph{Where the companion corpus falls.} We computed all three statistics on the companion manuscripts' 114-point windage corpus, from the aggregate design statistics reported in Appendix~\ref{app:companion} rather than from any re-analysis of its windage relationship (\texttt{results/companion\_overlap.json}). Its mean pairwise overlap in $\log Re$ is 0.317. Its minimum fold overlap is 0.008, which places it just above the transition of the previous paragraphs, and that margin is thin for a specific reason: the shared region on the fold holding out the largest facility spans $\log_{10} Re \in [6.796, 6.819]$ and contains exactly one of that facility's 45 points, and one of the other 69. By fold, the counts are 1 of 45, 20 of 20, 31 of 41 and 8 of 8.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/figB_corpus_windows.png}
+\caption{Operating windows of the companion corpus's four facilities. Three overlap substantially; the largest, contributing 45 of the 114 points, is displaced almost entirely beyond them. The shaded band is the only region its fold shares with the rest, and it contains one point from each side}
+\label{fig:windows}
+\end{figure}
+
+\paragraph{Where the companion corpus falls.} We computed all three statistics on the companion manuscripts' 114-point windage corpus, from the aggregate design statistics reported in Appendix~\ref{app:companion} rather than from any re-analysis of its windage relationship (\texttt{results/companion\_overlap.json}). Its mean pairwise overlap in $\log Re$ is 0.317. Its minimum fold overlap is 0.008, which places it just above the transition of the previous paragraphs, and that margin is thin for a specific reason, visible in Figure~\ref{fig:windows}: the shared region on the fold holding out the largest facility spans $\log_{10} Re \in [6.796, 6.819]$ and contains exactly one of that facility's 45 points, and one of the other 69. By fold, the counts are 1 of 45, 20 of 20, 31 of 41 and 8 of 8.
 
 One point is, by Table~\ref{tab:points}, sufficient. The stratified permutation test is therefore admissible on this corpus, at the narrowest margin the criterion allows. From a range overlap of 0.008 and a single shared point it is natural to infer the opposite, that no permutation is possible; the calibration does not support that inference.
 
@@ -330,12 +382,19 @@ The check still has some value, just far less than a 99.7--99.9\% figure suggest
 
 \section{Discussion}
 
-The recommendation this study supports is a two-step procedure rather than a single rule. \emph{First, measure how much your data sources actually overlap in covariate space}; the statistic is the minimum over leave-one-out folds of the intersection-over-union between the held-out source's covariate range and the union of the others' (Method), it needs nothing but the design matrix, and it decides which of the following applies. Use the minimum rather than an average across pairs: one separated source disables the test for its own fold however well the others agree. \emph{Second, choose the declaration rule accordingly}:
+The recommendation this study supports is a two-step procedure rather than a single rule. Figure~\ref{fig:decision} states it in full. \emph{First, measure how much your data sources actually overlap in covariate space}; the statistic is the minimum over leave-one-out folds of the intersection-over-union between the held-out source's covariate range and the union of the others' (Method), it needs nothing but the design matrix, and it decides which of the following applies. Use the minimum rather than an average across pairs: one separated source disables the test for its own fold however well the others agree. \emph{Second, choose the declaration rule accordingly}:
 
 \begin{itemize}
   \item \textbf{Every fold shares at least one observation with the rest}: use the \emph{stratified} facility-label permutation test. The criterion is a point count, not a range comparison, and the threshold is one (Table~\ref{tab:points}); where the count is one or two, treat a rejection as suggestive, since calibration there is only approximately nominal. It is computed from the same fits a LOFO audit already produces, requires no additional data collection, closes most of the gap between the threshold rule's best mechanism (Gaussian drift, 82.3\% detection) and its worst (nonlinear misspecification, 9.4\% detection), and unlike the naive permutation test it stays calibrated as the sources separate (Table~\ref{tab:overlap}).
   \item \textbf{Some fold shares no observation at all with the rest}: use the plain LOFO$>0$ threshold. It detects less, but it is by far the most conservative of the three --- no false alarm at any overlap level in the third pass, and 4 in 3,959 universal scenarios across the second --- whereas a stratified test drops to 60.7\% power there, below the threshold rule's own 80.0\% (Table~\ref{tab:points}).
 \end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/figD_decision_rule.png}
+\caption{The decision rule. The quantity that governs the choice is a count on the worst leave-one-facility-out fold, computable from the design matrix before any test is run}
+\label{fig:decision}
+\end{figure}
 
 The naive permutation test, which the first two passes alone would have recommended without qualification, is the rule we would now advise against as a default: it is the strongest option when supports overlap and the weakest when they do not, and which of those a practitioner is in is not visible from the LOFO output itself. That the earlier passes could not see this is instructive in its own right --- a benchmark that samples only one corner of the design space will confidently recommend a method that fails outside it.
 
@@ -393,7 +452,7 @@ No external funding.
 The authors declare no competing interests.
 
 \paragraph{Data Availability Statement}
-All synthetic scenario generation, audit protocol, and meta-model code, together with all reported summary statistics, are publicly available at \url{https://github.com/jesusgilru-prog/audit-protocol-reliability-dce}, tagged release \texttt{v2.7-companion-verified} for a stable, citable snapshot matching the numbers reported in this manuscript. Generated with fixed random seeds for exact reproducibility, hardcoded as \texttt{RNG\_SEED} at the top of each generation script and reported in the corresponding summary JSON files (\texttt{20260818} for the first and second passes and the meta-models, \texttt{20260825} for the third). A permanent Zenodo DOI archiving this repository will be minted and added here upon acceptance.
+All synthetic scenario generation, audit protocol, and meta-model code, together with all reported summary statistics, are publicly available at \url{https://github.com/jesusgilru-prog/audit-protocol-reliability-dce}, tagged release \texttt{v3.0-figures} for a stable, citable snapshot matching the numbers reported in this manuscript. Generated with fixed random seeds for exact reproducibility, hardcoded as \texttt{RNG\_SEED} at the top of each generation script and reported in the corresponding summary JSON files (\texttt{20260818} for the first and second passes and the meta-models, \texttt{20260825} for the third). A permanent Zenodo DOI archiving this repository will be minted and added here upon acceptance.
 
 \paragraph{Ethical Standards}
 This study uses only synthetic data and summary statistics reported in companion manuscripts by the corresponding author; it involves no human or animal subjects and no new experimental data collection.
