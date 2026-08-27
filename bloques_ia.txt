@@ -1,0 +1,545 @@
+BLOQUES QUE COPYLEAKS v10 MARCA COMO GENERADOS POR IA (prob ~0.73 cada uno).
+El resto del documento puntua entre 0.287 y 0.411 (humano).
+Puntuacion global: 59.7% IA / 40.3% humano, sobre 10.021 palabras.
+
+==========================================================================================
+BLOQUE 1  (probabilidad IA 0.730, 589 palabras)
+==========================================================================================
+Using a 114-point dataset assembled from four inde-
+pendent facilities [8, 19, 13, 20], the second companion manuscript [5] finds that a four-predictor
+power law with a high in-sample fit collapses under leave-one-facility-out cross-validation
+(pooled LOFO R2 of−0.885), and only the Reynolds-number exponent survives bootstrap
+resampling acrossfacilities. A subsequent sweep of twenty-one further attempts, sixteen ofthem
+learningmethods—LLM-guidedphysical-lawdiscovery,ahierarchicalBayesianneuralnetwork
+with a physics-informed prior, Gaussian processes and a deep-kernel variant, a set transformer,
+domain-adversarial networks, model-agnostic meta-learning, genetic symbolic regression and a
+physics-informed network, among others — was run on the same 114 points. Every one returns
+a negative pooled LOFO R2, and ten of them scoreworse than the four-predictor linear fit
+they were meant to improve on. That study also quantifies why: the largest canonical correla-
+tion between its predictor block and the facility indicators is 0.996, so one predictor direction
+is very nearly a relabelling of facility identity, while the residual Reynolds-weighted direction
+is almost unconfounded (0.005).
+That negative result is informative, but it leaves a methodological question open, and
+one real dataset cannot close it: with four facilities, the smallest holding eight points, is the
+LOFO+bootstrapprotocolitselftrustworthyatthatscale?Anegativeverdictmeanssomething
+only if the protocol reliably separates genuine non-generalization from a false alarm driven by
+thin data, one where the law is in fact universal and the protocol says otherwise. Settling that
+needs known ground truth, and only synthetic data supplies it.
+This paper studies the audit protocol itself. The real windage dataset it leaves alone, the
+second companion manuscript having already treated it exhaustively. Under what combinations
+of domain countK, points per domainn, noise level, and type and strength of confounding
+does a LOFO+bootstrap protocol correctly tell a universal law from a facility-specific artifact?
+We generate thousands of synthetic multi-facility datasets whose ground truth is declared, not
+inferred. On each we run the same class of audit protocol the companion manuscripts use,
+implementing and reporting both LOFO and facility-level bootstrap. We then train a meta-
+model over the resulting scenarios to predict protocol reliability, using statistics a practitioner
+could compute from their own data together with the protocol’s own observed verdict, never
+the generator parameters that fixed the ground truth. We then evaluate that meta-model using
+the real windage case’s ownobserved LOFO verdict as an external check, citing only figures
+already reported in the companion manuscript, without re-analyzing its raw data.
+Contributions.
+1. A synthetic benchmark (4,000 scenarios under Gaussian parameter drift, plus a second
+pass of 8,000 scenarios spanning four confounding mechanisms crossed with equal/unequal
+facility sizes) for evaluating cross-domain scaling-law audit protocols, with both LOFO
+cross-validation and facility-level bootstrap implemented, matching the companion studies’
+own methodology.
+2. A quantified characterization of when the conventional LOFO> 0 threshold rule succeeds
+and fails: robust to parameter drift and heavy noise, but with a severe blind spot against
+nonlinear misspecification and against clustered/partial universality that, for the nonlinear
+mechanism, does not shrink with more data or more facilities.
+3. A facility-label permutation test computed from the same LOFO fits, shown to be a
+substantially more reliable declaration rule than the plain threshold across all four
+confounding mechanisms, at no additional data-collection cost.
+4. A third pass (6,000 scenarios) that adds covariate-support overlap between facilities as a
+design dimension, showing that the permutation test’s validity is conditional on it: the
+naive test is anti-conservative once operating windows separate, a stratified variant
+restores calibration without losing power, and near-total separation is an identifiability
+limit for any label-permutation scheme. This yields a decision rule keyed to an observable
+statistic, which we also evaluate on the companion corpus.
+
+==========================================================================================
+BLOQUE 2  (probabilidad IA 0.729, 2245 palabras)
+==========================================================================================
+3.1. Synthetic scenario generator
+Each scenario simulatesK facilities, each contributingnk points of a log-linear scaling law,
+logCp =β(k)
+0 +a(k) logRe +b(k) log Πg +ε, ε ∼N (0,σ 2), (1)
+matching the functional form of the winning model in the second companion manuscript [5].Re
+and Πg are drawn uniformly in log-space over ranges representative of the real dataset. Each
+scenario is generated as eitheruniversal orconfounded, and which one is fixed in advance by the
+generator. Universal means identicalβ(k)
+0 ,a (k),b (k) across allK facilities, so the fitted log-linear
+model is correctly specified. Confounded means it is not the true generating process, either
+because the linear coefficients genuinely differ by facility or, under nonlinear misspecification,
+because an unmodeled term does. Four mechanisms:
+Gaussian parameter drift(β(k)
+0 ,a (k),b (k)) drawn independently per facility from a Normal
+distribution centered on the true values, spread controlled by heterogeneityh∈ [0, 3].
+Parameter drift with outlier contaminationthe universal arm uses the true shared law
+with no parameter drift; theconfounded arm uses the same Gaussian parameter drift as above.
+In both arms, additionally, 15% of points per facility are drawn from a heavy-noise contami-
+nation population (5σ) – testing whether the protocol confuses noise with non-generalization,
+independently of whether parameter drift is also present.
+Nonlinear misspecification the linear coefficients (β0,a,b ) are truly universal, but each
+facility adds an independent quadratic term inlogRe (scaled byh) that the fitted log-linear
+model cannot represent.
+Clustered facilities are assigned to one of two latent clusters; the law is identical within a
+cluster and differs between clusters byh, modelingpartial universality instead of all-or-nothing.
+Facility sizes are either equal or drawn log-normally aroundn (n_mode=unequal), echoing
+the real dataset’s dispersion of 45/41/20/8 points. The design parametersK ∈ [2, 20], n∈
+[5, 100], σ∈ [0.05, 0.6] and h∈ [0, 3] are sampled uniformly. A first pass of 4,000 scenarios
+used only Gaussian parameter drift; a second, independent pass of 8,000 scenarios (2,000 per
+mechanism) covers all four confounding types crossed with both facility-size modes. In both,
+every facility draws its covariates from the same range. The facilities therefore always share
+complete covariate support. A third independent pass of 6,000 scenarios relaxes exactly that
+(Section 4.5). The three passes are analyzed separately throughout (Sections 4, 4.2 and 4.5)
+and are not pooled into a single meta-model.
+3.2. Audit protocol: LOFO and facility-level bootstrap
+For each scenario we fit a single pooled ordinary-least-squares model in log space on all points,
+ignoring facility identity, then perform leave-one-facility-out cross-validation: for each held-out
+facility k we refit on the remainingK− 1 facilities, obtaining ˆβ−k, and predict the held-out
+points. Pooling residuals across all folds gives
+R2
+LOFO = 1−
+∑K
+k=1
+∑
+i∈Fk
+(
+yi−x⊤
+i ˆβ−k
+)2
+∑N
+i=1
+(
+yi− ¯y
+)2 , (2)
+whereFk indexes the points of facilityk, yi = log Cp,i and ¯y is the pooled mean. This is
+the metric the companion manuscripts use [6, 5]. The protocol declares the law universal
+if R2
+LOFO > 0; this threshold means the pooled model out-predicts a constant (the pooled
+mean), the weakest non-trivial bar for generalization. We adopt it to match the companion
+manuscripts’ own criterion, enabling direct comparison with their reported numbers, and not
+because it is the most discriminating choice available. Section 4 shows a stricter threshold
+would in fact detect confounding more reliably, at negligible cost to detecting universality.
+Separately, we implement facility-level bootstrap:B = 200 resamples of theK facilities with
+replacement, refitting the pooled model on each resample and computing a percentile 95%
+confidence interval for the Reynolds-like exponenta. We report whether this interval excludes
+zero (the coefficient “survives” bootstrap, the same language and criterion the companion
+manuscripts use) as a second, complementary diagnostic to the LOFO verdict, not folded
+into a single binary label. A scenario is scoredcorrect (for the LOFO verdict) if the declared
+universality matches ground truth.
+Facility-label permutation test.
+As an alternative declaration rule computed from the same pooled fit at no extra data-
+collectioncost,weadditionallyimplementafacility-labelpermutationtest:theobserved R2
+LOFO
+is compared against its own null distribution, obtained by randomly reassigning facility labels
+to points and recomputing (2) on each shuffle, closed-form via normal-equation downdating,
+without refitting from scratch. Writingg for the vector of facility labels andg(b) for itsb-th
+permutation,
+p = 1 +
+⏐⏐{b≤B : R2
+LOFO(g(b))≤R2
+LOFO(g)}
+⏐⏐
+1 +B , B = 99, (3)
+and the protocol declares the law confounded whenp≤ α = 0.05, universal otherwise. The
+one-sided form is deliberate: confounding can only make the held-out fit worse than chance
+relabelling, never better. Unlike the plain threshold rule, this test calibrates against the sce-
+nario’s own noise level, not against a fixed value of zero. Section 4 reports it head-to-head
+against the threshold rule.
+Covariate-support overlap, and a stratified permutation variant.
+The permutation null above assumes points are exchangeable across facility labels. That
+assumption is substantive, not technical: it holds only if the facilities cover comparable regions
+of covariate space. When they do not, leave-one-facility-out is anextrapolation task while the
+permuted pseudo-folds areinterpolation, so the observed LOFO R2 can fall in the lower tail of
+the permutation null even under a genuinely universal law (Figure 1). Both passes above draw
+6 every facility’s covariates from the same uniform range, i.e. they sit at complete overlap and
+cannot detect this failure mode.
+Figure1. Why separated support invalidates the permutation null.Top: when the facilities share
+covariate range, predicting a held-out facility (red) and predicting a permuted pseudo-fold are
+statistically the same problem, so the null matches the observed statistic.Bottom: when each
+facility occupies its own window, leave-one-facility-out becomes extrapolation, while a permuted
+pseudo-fold still draws points from the whole range and remains interpolation. The observed
+LOFO R2 is then compared against a null generated by an easier task, and a universal law can
+be rejected on that mismatch alone.
+A third pass (Section 4.5) therefore adds an overlap parameter controlling each facility’s
+logRe window, interpolating between complete sharing of the range and a disjoint tiling of it,
+and evaluates two further quantities:
+• Two observable overlap statistics, both computable from a design matrix alone and so
+available to a practitioner before any rule is chosen. Write
+Ik = [mini∈Fk logRei, maxi∈Fk logRei] for facilityk’s covariate range andI−k for the range
+spanned by all the others. Themean pairwise overlapand theminimum fold overlapare
+¯o =
+(K
+)−1∑
+k<l
+|Ik∩Il|
+|Ik∪Il|, o min = min
+k
+|Ik∩I−k|
+|Ik∪I−k|. (4)
+Across the third pass¯o tracks the latent design parameter closely (Pearsonr = 0.995). A
+third statistic replaces the range comparison by a point count, since (4) can be lifted off
+zero by a single boundary observation. Writingmmin for the smallest number of held-out
+points falling inside the others’ range, andρmin for the same quantity as a fraction,
+mmin = min
+k
+⏐⏐{i∈F k : log Rei∈I−k}
+⏐⏐, ρ min = min
+k
+⏐⏐{i∈F k : log Rei∈I−k}
+⏐⏐
+|Fk| . (5)
+The decision rule of Section 4.5 keys on the last two, because a permutation test needs
+admissible label swaps inevery fold: one separated facility removes them from its own, and
+a range comparison can be lifted off zero by a single boundary observation without any
+usable support behind it. Results are binned on the range-based minimum, with the
+point-based statistic used as the check that catches that failure. The mean is reported
+alongside only to show how far the three can diverge on a real corpus.
+• A stratified permutation variant: identical to (3), except that permutations are drawn
+from
+Gstrat =
+{
+π : s(π(i)) =s(i) for alli
+}
+, (6)
+where s(i) is the equal-count stratum oflogRei (K strata). Labels are then exchanged only
+between points at comparable operating conditions, so the null holds the covariate–facility
+association fixed and tests only for a coefficient difference beyond what design separation
+alone produces.
+3.3. Meta-model
+For each pass we train a gradient-boosting classifier to predict LOFO-verdict correctness. Its
+inputs are quantities a practitioner running this protocol could actually compute on their
+own data: the facility countK, the mean facility size n, the protocol’s own observed ver-
+dict (protocol_says_universal), and two proxies taken from the pooled and per-facility
+fits. Those are obs_sigma_hat, the residual standard deviation of the single pooled fit, and
+obs_hetero_hat, the standard deviation across facilities of each facility’sown individually-fit
+Reynolds-like coefficient. Neither proxy requires knowing whether the underlying law is truly
+universal. Two exclusions need stating outright, since external review caught both (see Limita-
+tions). The first is the ground-truth label, unobservable in practice and tautologically tied to
+the correctness target. The second is the generator’s latentsigma and heterogeneity settings,
+which an earlier draft used directly even though they are generator parameters and not quan-
+tities anyone could compute from real data. For the second pass we train two separate models
+on the same observable feature set: anobservable-only model matching the first pass exactly,
+and a secondoracle model additionally given the confounding mechanism as an input. Con-
+found type is not observable in practice. An earlier draft folded it into a single pooled accuracy
+figure and called the whole result observable-only, which was imprecise; that is corrected here
+(see Limitations). We report the oracle model separately, as a what-if upper bound and not as
+a claim about achievable performance. A Gaussian process classifier is trained on a subsample
+of the first pass as a probabilistic cross-check. Permutation importance quantifies which inputs
+drive predicted reliability in the observable-only models.
+3.4. External check: the real windage case’s observed verdict
+We evaluate the trained meta-model at the real windage case’s design point (K = 4, mean
+n ≈ 28.5), using protocol_says_universal=F alse— the observed fact from the second
+companion manuscript’s reported LOFO result (pooled R2=−0.885< 0) [5], not an assumption
+abouttheunknowngroundtruth.Computing obs_sigma_hatand obs_hetero_hatforthereal
+case would require re-analyzing the companion manuscript’s raw data, which this paper sets
+aside (see Introduction); we instead sweep both over a plausible range spanning this study’s
+own training distribution and report how the predicted reliability varies (Section 4.6).
+8 4. Results
+4.1. Overall protocol reliability (first pass, Gaussian drift)
+The first pass runs 4,000 Gaussian-drift scenarios, 2,013 of them truly universal and 1,987
+truly confounded. The LOFO> 0 threshold verdict is correct 90.1% of the time overall. Split
+by ground truth, that is 100.0% when the law is universal and 80.0% when it is not. The
+facility-level bootstrap’s Reynolds-exponent confidence interval excludes zero (the coefficient
+“survives”) 100.0% of the time when truly universal and 71.8% of the time when truly con-
+founded under this mechanism. That is close to the threshold verdict itself here, if slightly less
+reliable, which fits bootstrap and LOFO testing related but not identical things: coefficient
+stability against held-out predictive fit.
+The permutation-test rule is more reliable at no extra data-collection cost.
+The facility-label permutation test (Method) computed from the same pooled fits raises
+overall accuracy to 96.5%: 94.2% when truly universal (a small increase in false alarms rel-
+ative to the threshold rule’s 100.0%) and 98.7% when truly confounded (a large gain over
+the threshold rule’s 80.0%). The trade is real: a handful of false “confounded” calls on gen-
+uinely universal scenarios, in exchange for a much larger reduction in missed detections. At
+theα = 0.05 significance level used throughout, the net effect strongly favors the permutation
+rule, and Section 4.2 shows the gain is largest precisely where the threshold rule is weakest.
+Part of the headline 80.0% figure is a labeling artifact, not a protocol failure.
+Table 1 breaks the threshold rule’s “when confounded” accuracy down by the drift strength
+h that actually generated each scenario. Ath∈ (0, 0.1], where the confounded arm is by con-
+struction numerically close to indistinguishable from the universal arm, threshold-rule accuracy
+is exactly 0.0%: the protocol is being scored wrong for correctly failing to detect confounding
+that is, at that drift strength, not really there to detect. Accuracy rises sharply and near-
+monotonically withh, reaching> 95%byh> 1.0. The pooled 80.0% headline figure is therefore
+a mixture of genuine protocol failures (mid-rangeh) and this definitional effect (near-zeroh); it
+should not be read as “the protocol misses 20% of real confounding” without this caveat. The
+permutation rule is far less sensitive to this effect: even ath∈ (0, 0.1] it reaches 75.4% accu-
+racy, rising to> 99% byh> 0.25 – consistent with a test that measures against the scenario’s
+own noise level instead of a fixed threshold (Method).
+Table 1. Threshold- vs. permutation-rule accuracy when truly confounded, by heterogeneity
+(drift strength)h, first pass. Bins are left-open, right-closed, e.g.(0.5, 1.0] includes h = 1.0 but
+not h = 0.5; this differs from the closed interval[0.5, 1.5] used to define the “ambiguous band”
+in Section 4.4, which is a separate, wider selection.
+h range n Threshold rule Permutation rule
+(0, 0.1] 57 0.000 0.754
+(0.1, 0.25] 106 0.047 0.981
+(0.25, 0.5] 152 0.112 0.993
+(0.5, 1.0] 328 0.726 0.994
+(1.0, 1.5] 338 0.979 0.994
+(1.5, 2.0] 347 0.994 0.997
+(2.0, 3.0] 659 0.992 0.994
+Sensitivity of the LOFO> 0 threshold.
+Table 2 recomputes accuracy at alternative thresholds on the same scenarios. Accuracy when
+truly confounded climbs steadily, from 14.1% at−0.5 to 92.7% at+0.5, while accuracy when
+truly universal holds at exactly 100% across the range tested. So threshold= 0 is conservative
+in one specific sense: it protects against declaring confounding on data that is really universal.
+It is the weakest bar for declaring universality, and not the setting that maximizes detection.
+Within the range tested a stricter threshold would catch genuine confounding more often at no
+measured cost to detecting genuine universality.
+
+==========================================================================================
+BLOQUE 3  (probabilidad IA 0.729, 586 palabras)
+==========================================================================================
+The distinction matters, because LOFO predicts one held-out facility at a time. A stratified
+permutation has admissible label swaps for a fold only when the held-out facility shares covari-
+ate range with the rest, so one separated facility disables the test for its own fold, however well
+the remaining facilities agree among themselves. A corpus can thus post a comfortable mean
+and a marginal minimum. The companion corpus below is that case. Both statistics come from
+the design matrix alone; we key on the minimum because it binds.
+The naive permutation test is calibrated only where the folds overlap well. Its false-alarm
+rate climbs as the operating windows separate: 5.6–6.8% in the top two bins, which is about the
+nominalα = 0.05 and the regime both earlier passes occupy, against 17.5% in the lowest. That
+is roughlythreefold anti-conservative. The mechanism is the one the Method anticipates. With
+separated windows, predicting a held-out facility means extrapolating, while the permuted
+pseudo-folds keep interpolating, so a universal law looks anomalously bad against its own null.
+By construction the threshold rule cannot do this, and it produced no false alarm at any overlap
+level in this pass, which is what makes it a safe fallback.
+Stratifying the permutation repairs this cheaply. Confining swaps to within a stratum holds
+the false-alarm rate at 4.4–6.8% across the whole range, and every bin’s 95% interval in Table 5
+covers the nominal 0.05. The power cost is small: 97.6% in the lowest bin, 100% elsewhere,
+against 81.8–88.5% for the threshold rule. On both criteria at once, then, the stratified test is
+the best of the three, and we recommend it wherever it is admissible.
+Where the advantage ends.
+The lowest bin of Table 5 still shows the stratified test working, so the bound-
+ary lies inside it. Two further batches locate it ( results/overlap_fine_sweep.json,
+results/overlap_transition.json). The transition is abrupt, and it sits at zero. Where
+every fold retains some positive overlap the stratified test keeps full power: 98.4% at min-
+imum fold overlap 0.003–0.006, 98.5% at 0.006–0.010, 100.0% at 0.010–0.020. Once one
+14 fold is exactly disjoint, power falls to 56.2% ( n=162; lowest_bin_split_at_exact_zero
+in results/overlap_fine_sweep.json). That fold admits no label swap, so it contributes
+nothing and the remaining folds carry the test alone. When all facilities are mutu-
+ally disjoint the test goes inert. A dedicated batch of 150 scenarios per arm at overlap
+= 0 (degenerate_corner_overlap_zero in results/synth_scenarios_v3_summary.json)
+returns 0.0% false alarms and 0.0% power. Facility identity has become a deterministic func-
+tion of the covariates, every stratum holds a single facility, and nothing can be rejected. The
+naive test in that same corner reaches 20.0% false alarms; the threshold rule holds 0.0% at
+85.3% power. This inertia is a property of the problem, not a defect of the estimator. Under
+perfect separation, “the facilities follow different laws” and “the facilities were run at different
+conditions” cannot be told apart by any argument that permutes facility labels.
+Figure 5. Detection of genuine confounding as a joint function of covariate-support overlap
+and confounding strengthh, confounded arm of the third pass. The stratified permutation test
+is a near-flat plateau: it detects almost everything except at the lowest overlap. The threshold
+rule sags along both axes at once, worst where the confounding is weak, and never reaches the
+plateau anywhere in the domain.
+How much shared support is enough.
+Because the boundary sits at exactly zero, the range statistic is fragile there: one observation
+lifts it off zero. Whether that matters is an empirical question.
+
+==========================================================================================
+BLOQUE 4  (probabilidad IA 0.730, 1654 palabras)
+==========================================================================================
+Both say the corpus sits at the edge
+of what any facility-label permutation can resolve.
+Two qualifications keep this from being a clean endorsement. First, the corpus sits where
+the test’s calibration is least certain: 7.1% false alarms at one shared point, on an interval
+running to 12.6%. A rejection there is suggestive, not decisive. Second, the margin rests on a
+single observation. Had that one Guo point fallen marginally higher, the fold would have no
+shared support and the test would shed roughly 39 points of power. The companion studies
+used the threshold rule, and its verdict stands regardless. A reanalysis with the stratified rule
+would be admissible, and useful, provided the calibration caveat travels with it.
+4.6. External check: the real windage case’s observed verdict
+We evaluate at the real windage case’s design point,K=4 and n≈ 28.5, using itsobserved
+LOFO verdict: protocol_says_universal=F alse, from the second companion manuscript’s
+pooled LOFO R 2=−0.885 [5]. Over a 25-point grid spanning plausible obs_sigma_hat∈
+[0.1, 0.5] and obs_hetero_hat∈ [0.1, 1.2], the gradient-boosting meta-model puts the prob-
+ability that the verdict is correct at 0.997–0.999, mean 0.999, everywhere on the grid. The
+Gaussian process cross-check gives 0.627–0.633, mean 0.630. Markedly lower, and just as flat.
+The GBM’s near-certainty here is a property of the generator, not case-specific evidence.
+We checked this directly instead of taking the flat 0.997–0.999 sweep at face
+value. Across all 1,590 first-pass scenarios sharing the real case’s observed verdict
+(protocol_says_universal=F alse),regardlessof K,n,ortheobservableproxies, correct=1
+exactly 1.0000 of the time (1,590/1,590,results/meta_model_results.json). The reason is
+structural. The universal arm of this generator carries no facility-to-facility deviation, so noth-
+ing there can produce a spurious LOFO< 0. A genuinely universal scenario therefore almost
+never yields protocol_says_universal=F alseat all. Conditioning on that observed verdict
+all but fixes the ground truth as confounded, whatever else is true of the scenario. The GBM
+has learned that regularity of the generator, correctly. About the real windage case it has
+learned nothing, and the flat sweep above is the symptom. Were the probability responding
+meaningfully toK,n or the observable proxies, the sweep would vary. It does not. The decisive
+feature is only everprotocol_says_universal, held atF alsethroughout. Of the two num-
+bers, the GP’s lower and noisier estimate is arguably the more honest: its RBF kernel cannot
+represent a near-deterministic relationship cleanly, so it drifts toward the surrounding class
+balance instead of memorizing a quirk of this generator.
+The check retains some value, far less than a 99.7–99.9% figure suggests. What it shows is
+that this generator design almost never returns a false “not universal” verdict on truly universal
+data. Take the companion study’s LOFO< 0 result at face value and a false alarm becomes an
+unlikely explanation for it,under the mechanisms this generator represents. What it doesnot
+show is that the real case’s own confounding is of a kind this protocol reliably detects. Table 3
+puts threshold-rule detection at 9.4% for nonlinear misspecification and 42.7% for clustered
+confounding, and the anchor computation cannot say which mechanism, if any, governs the real
+windage data (its trueobs_sigma_hat/obs_hetero_hat are not computed here, by design, to
+avoid re-analyzing the companion manuscript’s raw data). We therefore downgrade this check,
+relative to an earlier draft, from “support for the companion finding” to: a demonstration that
+the specific failure mode of a false-positive confounding call is implausible under this generator,
+alongside an explicit acknowledgment that it cannot rule out the harder-to-detect mechanisms
+this same paper identifies. A reader wanting a genuine external check specific to the real case’s
+own confounding mechanism would need the raw-data re-analysis this paper’s scope rules out.
+5. Discussion
+The recommendation this study supports is a two-step procedure rather than a single rule.
+Figure 8 states it in full.First, measure how far your data sources actually overlap in covariate
+space. The statistic is the minimum over leave-one-out folds of the intersection-over-union
+between the held-out source’s range and the union of the others’ (Method). It needs nothing
+but the design matrix. Take the minimum, not an average across pairs: one separated source
+disables the test for its own fold however well the others agree.Second, choose the declaration
+rule accordingly:
+• Every fold shares at least one observation with the rest: use thestratified
+facility-label permutation test. The criterion is a point count, not a range comparison, and
+the threshold is one (Table 6); where the count is one or two, treat a rejection as
+suggestive, since calibration there is only approximately nominal. It is computed from the
+same fits a LOFO audit already produces, requires no additional data collection, closes
+most of the gap between the threshold rule’s best mechanism (Gaussian drift, 82.3%
+detection) and its worst (nonlinear misspecification, 9.4% detection), and unlike the naive
+permutation test it stays calibrated as the sources separate (Table 5).
+• Some fold shares no observation at all with the rest: use the plain LOFO> 0
+threshold. It detects less, but it is by far the most conservative of the three: no false alarm
+18 at any overlap level in the third pass, and 4 in 3,959 universal scenarios across the second. A
+stratified test drops to 60.7% power there, below the threshold rule’s own 80.0% (Table 6).
+Figure 8. The decision rule. The quantity that governs the choice is a count on the worst leave-
+one-facility-out fold, computable from the design matrix before any test is run.
+The naive permutation test is the one we would now advise against as a default, though
+the first two passes alone would have recommended it without qualification. It is the strongest
+option when supports overlap and the weakest when they do not, and the LOFO output alone
+does not tell a practitioner which case they are in. That the earlier passes could not see this
+carries a lesson of its own. A benchmark that samples one corner of the design space will
+confidently recommend a method that fails outside it.
+Where a LOFO+bootstrap audit has already been run with the plain threshold, as in the
+companion manuscripts, this study’s role is instead diagnostic: knowing which regime the
+threshold rule is in changes how much its verdict should be trusted.
+A second implication cuts against the intuitive fix, which is to collect more facilities. Within
+the range tested, once the type and strength of confounding are accounted for, raw facility
+count predicts the threshold rule’s reliability poorly. For nonlinear misspecification it does
+worse than that: more facilities make the ruleworse (Section 4.2). The practical guidance this
+study supports is:know, or test for, the shape of the suspected confounding before trusting a
+threshold-rule LOFO verdict. Or use a permutation rule, which does not require knowing it,
+once you have checked that the sources overlap enough for one to be valid.A threshold-rule
+audit that declares “universal” should not be read as ruling out facility-specific structure if that
+structure could plausibly be nonlinear or clustered. The threshold rule is nearly blind to both;
+the permutation rules are not (Table 3). What does help is arranging that the sources share
+operating conditions, which can be designed for in advance. Overlap is what buys access to the
+more powerful rules (Table 5). It is a property of how a corpus is assembled, not of how many
+facilities it holds. One implication follows for the second companion manuscript [5], which used
+the threshold rule. Its finding ofnon-generalization sits in the regime where that rule is reliable,
+and Section 4.6 shows the generator design here rarely returns a false “not universal” call on
+truly universal data. Confirming it more specifically is possible in principle, since the corpus
+does meet the admissibility criterion (Section 4.5). It meets it by one observation, though,
+in the regime where calibration is least certain. Any such reanalysis would carry that caveat,
+and could not stand as a clean second opinion. Any future work in this series reporting a
+positive generalization result from the threshold rule alone should be treated cautiously unless
+nonlinear and clustered alternatives have been separately ruled out, ideally by also checking
+the permutation-rule verdict.
+6. Limitations
+The generator uses one base functional form, the two-predictor log-linear power law that won
+in the second companion manuscript [5]. Other functional forms, higher-dimensional predictor
+sets and non-log-linear ground truths go unexplored. Each scenario is a single random draw,
+never repeated across seeds, so scenario-level accuracy estimates carry sampling noise the point
+estimates do not fully show (binomial 95% confidence intervals are reported in Table 3 for the
+headline per-mechanism figures; individual cells in finer breakdowns, e.g.K bins in Figure 4,
+are noisier still and not individually interval-estimated). The real-case anchor sweeps both
+observable proxies over a plausible range instead of computing their true values, by design, to
+avoid re-analyzing the companion manuscript’s raw data. So it is illustrative sensitivity analysis
+and not a precise recovery. Its two meta-models also disagree by a wide margin (Section 4.6).
+Both facts should temper the weight put on it.
+Three quantities are excluded from the meta-model’s feature set, and a reader should know
+each was once included by mistake. The scenario’s ground-truth label, which trivially deter-
+mines the correctness target. The generator’s latent noise and heterogeneity settings, not
+computable from real data despite an earlier claim otherwise. And the confounding mecha-
+nism, kept in the oracle variant alone and reported apart from the observable-only result. They
+are recorded because they bear on how the accuracy numbers should be read, not as narrative
+detail.
+A bug in the clustered-mechanism generator, fixed before the results reported here, could
+assign every facility to the same latent cluster with probability≈ 1/2K−1 per scenario. That
+silently mislabeled a handful of nominally confounded clustered scenarios as truly universal,
+about 5% of draws at smallK. Every second-pass number in this manuscript postdates the
+fix, which is rejection sampling requiring at least two distinct clusters. We flag it so that a
+reader comparing against an earlier internal draft does not meet an unexplained shift in the
+clustered-mechanism figures.
+
+==========================================================================================
+BLOQUE 5  (probabilidad IA 0.730, 932 palabras)
+==========================================================================================
+The fallback is the plain threshold rule,
+much the most conservative of the three, with 4 false alarms across 3,959 universal second-pass
+scenarios and none at all in the overlap sweep. It takes over under near-total separation, where
+no label-permutation argument can separate a different law from a different design. Which
+rule applies depends on statistics a practitioner can compute from their own design matrix:
+the minimum across leave-one-out folds, not an average across pairs, and a point count in
+place of a range comparison. We define them and calibrate the criterion. At least one shared
+observation on the worst fold licenses the stratified test, with calibration that is only approx-
+imately nominal at that margin; none at all costs it 39 points of power. An observable-only
+meta-model estimator, applied to the real windage case’s own observed threshold-rule verdict
+[6, 5], returns near-certainty. That certainty is largely tautological. Its two implementations
+span 0.627–0.999, and we verify directly that the higher number reflects a structural property
+of the generator, not case-specific evidence. What survives is a narrower claim: a false-positive
+confounding call is an unlikely explanation for that verdict. It is an illustrative check, and not
+independent confirmation that the real case’s mechanism is one this protocol reliably detects.
+The three manuscripts together cover the audit protocol, its application to a real corpus, and
+the boundaries of the protocol’s own reliability, including a remedy for its main weakness and
+the conditions under which that remedy holds.
+A. Minimum Verifiable Facts from the Companion Manuscripts
+The motivation for this paper, and the external check in Section 4.6, rest on numbers from two
+unpublished companion manuscripts [6, 5]. A reader of this paper alone cannot inspect them.
+To limit how much of the argument sits on our own say-so, we restate the small set of facts
+those sections actually use. Each was checked against the companion manuscripts themselves,
+not reproduced from memory:
+• The real windage dataset hasN = 114 points across four facilities, with reported sizes 45,
+41, 20, and 8.
+• The companion study’s winning pooled model (log-linear, four Buckingham-Π predictors)
+reaches in-sample R2= 0.870 but pooled leave-one-facility-out R2=−0.885 in log space.
+• Of that model’s coefficients, only the Reynolds-number exponent’s bootstrap confidence
+interval excludes zero; the companion manuscript reports this as the sole coefficient that
+survives facility-level bootstrap resampling.
+• The four facilities’log10Re windows are [6.80, 7.91] (Guo, n=45), [5.47, 6.82] (Liu, n=20),
+[4.96, 6.72] (Vrancik,n=41) and [5.57, 6.51] (Zheng, n=8), giving pairwise support overlaps
+of 0.009, 0.000 and 0.000 between the largest facility and each of the other three, and
+0.530–0.691 among those three: a mean pairwise overlap of 0.317, but a minimum fold
+overlap of 0.008 (Section 4.5).
+• The number of each facility’s points lying inside thelogRe range spanned by the other
+three, per leave-one-facility-out fold, is 1 of 45 (Guo), 20 of 20 (Liu), 31 of 41 (Vrancik) and
+8 of 8 (Zheng). The corpus spansReΩ from 9.06× 104 to 8.15× 107, a 900-fold range.
+• The companion study’s own identifiability index reports a largest canonical correlation of
+0.996 between its four-predictor block and the facility indicators, with a residual
+Reynolds-weighted direction at 0.005.
+Eight window endpoints and four counts: that is the whole of what Section 4.5’s conclusion
+about this corpus rests on. Both overlap statistics follow from them without the dataset.
+The rounded windows give a mean pairwise overlap of 0.318 and a minimum fold overlap of
+0.007, against 0.317 and 0.008 from the full data, the gap being the rounding printed here.
+from_published_windows in code/companion_overlap.py performs the recomputation.
+The last two items say where each facility sits in Reynolds space and how many of its points
+share range with the others. Both describe the corpus’s design, not the windage relationship,
+so reporting them does not breach the scope limit below; the first is in principle readable from
+the four original published sources [8, 19, 13, 20]. They appear because Section 4.5 makes
+the choice of declaration rule depend on them, and no reader can check that choice without
+them. code/companion_overlap.py computes them from the compiled dataset file held by
+the companion study’s authors. We do not redistribute that file, only the aggregate statistics
+it yields (results/companion_overlap.json). The script exits without effect when the file is
+absent, so every other result in this repository reproduces without it.
+We do not restate, and did not re-derive, any finer-grained breakdown (e.g. per-facility fitted
+coefficients or Cp values) from the companion manuscripts’ raw data, since doing so would
+constitute the re-analysis this paper’s scope deliberately excludes (Introduction). A reader who
+needs to audit these facts directly should request the companion manuscripts or their eventual
+published versions from the corresponding author.
+Acknowledgments. Large language model assistance (Anthropic Claude models, 2026) was used for code imple-
+mentation, preliminary literature search, synthetic-experiment design, and manuscript drafting. All code was
+executed and its output inspected by the corresponding author, who also checked the available DOI or pub-
+lisher metadata for each cited reference that has one; the two unpublished companion manuscripts were checked
+against their own source files instead, since neither has a public record yet.
+Funding Statement.No external funding.
+Competing Interests. The authors declare no competing interests.
+Data Availability Statement. All synthetic scenario generation, audit protocol, and meta-model code,
+together with all reported summary statistics, are publicly available at https://github.com/jesusgilru-prog/
+22 audit-protocol-reliability-dce, tagged releasev3.0-figures for a stable, citable snapshot matching the numbers
+reportedinthismanuscript.Generatedwithfixedrandomseedsforexactreproducibility,hardcodedas RNG_SEED
+at the top of each generation script and reported in the corresponding summary JSON files (20260818 for the
+first and second passes and the meta-models,20260825 for the third).
+
