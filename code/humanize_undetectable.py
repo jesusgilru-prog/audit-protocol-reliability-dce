@@ -14,8 +14,13 @@ broken, "et al." severed):
    leaves: inline maths, \\citep/\\ref/\\texttt/\\emph arguments, and every
    numeric literal. Each becomes an opaque sentinel the model has no reason
    to alter, and the originals are restored afterwards. A response that
-   loses or mangles a sentinel is rejected outright, so no number, citation
-   or cross-reference can be corrupted by a substitution that slips through.
+   loses, duplicates or reorders a sentinel is rejected outright.
+
+   This bounds the damage; it does not eliminate it. A sentinel that keeps
+   its position can still end up attached to a different noun, and the
+   surrounding claim can be inverted without touching a single number --
+   both failure modes were observed in the pilot. Every proposal still
+   needs to be read before it is accepted.
 
 Nothing is written back to the manuscript automatically. The script emits a
 review file of ORIGINAL/PROPOSED pairs; accepting them is a separate,
@@ -34,10 +39,17 @@ ENV = "/home/jesus/paper_ai_checker/.env"
 SUBMIT = "https://humanize.undetectable.ai/submit"
 DOCUMENT = "https://humanize.undetectable.ai/document"
 
-# Config confirmed against the vendor's own API reference: v11sr is the
-# slowest and best English model; University/Article match the register.
-CFG = dict(readability="University", purpose="Article",
-           model="v11sr", strength="More Human")
+# Settings chosen by controlled experiment, not by what the register labels
+# suggest. Varying one factor at a time showed the academic purposes
+# (Article, Report, Essay) push the output towards heavier, more formal
+# prose -- the opposite of what is wanted -- while "General Writing" keeps
+# the sentences plain. "Quality" preserves meaning far better than the
+# stronger settings, which is what actually gates acceptance here.
+# The earlier University/Article/v11sr/More Human combination is the one
+# that produced the corrupted output recorded in logs/undetectable_pilot.md;
+# it is kept here only as a reminder not to return to it.
+CFG = dict(readability="University", purpose="General Writing",
+           model="v11", strength="Quality")
 
 MIN_LEN = 50        # API minimum for `content`
 MAX_LEN = 12000     # keep a paragraph in one request
@@ -90,8 +102,19 @@ def restore(text, store):
     return text
 
 
-def all_sentinels_intact(text, store):
-    return all(text.count(k) == 1 for k in store)
+SENTINEL = re.compile(r"Zq[a-z]+Zq")
+
+
+def all_sentinels_intact(original, text, store):
+    """Every sentinel present exactly once AND in its original order.
+
+    Counting alone is not enough: a rewrite that swaps two numbers keeps
+    every count at one while silently attaching each figure to the wrong
+    noun, which is precisely the corruption this check exists to catch.
+    """
+    if not all(text.count(k) == 1 for k in store):
+        return False
+    return SENTINEL.findall(original) == SENTINEL.findall(text)
 
 
 # ------------------------------------------------------------------ quality
@@ -148,8 +171,8 @@ def humanize_paragraph(par, key):
     out = fetch(doc, key)
     if not out:
         return None, "timeout"
-    if not all_sentinels_intact(out, store):
-        return None, "sentinel lost"
+    if not all_sentinels_intact(prot, out, store):
+        return None, "sentinel lost or reordered"
     restored = restore(" ".join(out.split()), store)
     bad = degenerate(flat, restored)
     if bad:
