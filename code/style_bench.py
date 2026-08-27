@@ -135,7 +135,12 @@ def evaluate(original_tex, output, num_store, glo_store):
     # order check: a reordered sentinel keeps the count but breaks the claim
     order_in = [k for k in re.findall(r"(?:Zq[a-z]+Zq|Gx[a-z]{2}Gx)", original_tex)]
     order_out = [k for k in re.findall(r"(?:Zq[a-z]+Zq|Gx[a-z]{2}Gx)", flat)]
-    reordered = order_in != order_out
     restored = restore(restore(flat, glo_store), num_store)
-    return restored, ("placeholders reordered" if reordered else None), \
-        semantic_flags(original_tex, flat), register_score(flat)
+    # Reordering is a warning, not a rejection: moving a clause is legitimate,
+    # moving a number between clauses is not, and only reading tells them
+    # apart. Losing a placeholder outright is unambiguous, so that one stays
+    # fatal above.
+    flags = semantic_flags(original_tex, flat)
+    if order_in != order_out:
+        flags = ["placeholders reordered - read carefully"] + flags
+    return restored, None, flags, register_score(flat)
