@@ -1,0 +1,199 @@
+{
+ "modelVersion": "v10.0",
+ "results": [
+  {
+   "classification": 1,
+   "probability": 0.41119176,
+   "matches": [
+    {
+     "text": {
+      "chars": {
+       "starts": [
+        0
+       ],
+       "lengths": [
+        4100
+       ]
+      },
+      "words": {
+       "starts": [
+        0
+       ],
+       "lengths": [
+        598
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "classification": 2,
+   "probability": 0.7255197,
+   "matches": [
+    {
+     "text": {
+      "chars": {
+       "starts": [
+        4100
+       ],
+       "lengths": [
+        21745
+       ]
+      },
+      "words": {
+       "starts": [
+        598
+       ],
+       "lengths": [
+        3154
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "classification": 1,
+   "probability": 0.33328766,
+   "matches": [
+    {
+     "text": {
+      "chars": {
+       "starts": [
+        25845
+       ],
+       "lengths": [
+        14004
+       ]
+      },
+      "words": {
+       "starts": [
+        3752
+       ],
+       "lengths": [
+        2031
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "classification": 2,
+   "probability": 0.7164383,
+   "matches": [
+    {
+     "text": {
+      "chars": {
+       "starts": [
+        39849
+       ],
+       "lengths": [
+        3625
+       ]
+      },
+      "words": {
+       "starts": [
+        5783
+       ],
+       "lengths": [
+        568
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "classification": 1,
+   "probability": 0.29878438,
+   "matches": [
+    {
+     "text": {
+      "chars": {
+       "starts": [
+        43474
+       ],
+       "lengths": [
+        3639
+       ]
+      },
+      "words": {
+       "starts": [
+        6351
+       ],
+       "lengths": [
+        561
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "classification": 2,
+   "probability": 0.7285711,
+   "matches": [
+    {
+     "text": {
+      "chars": {
+       "starts": [
+        47113
+       ],
+       "lengths": [
+        20224
+       ]
+      },
+      "words": {
+       "starts": [
+        6912
+       ],
+       "lengths": [
+        3048
+       ]
+      }
+     }
+    }
+   ]
+  },
+  {
+   "classification": 1,
+   "probability": 0.38512215,
+   "matches": [
+    {
+     "text": {
+      "chars": {
+       "starts": [
+        67337
+       ],
+       "lengths": [
+        536
+       ]
+      },
+      "words": {
+       "starts": [
+        9960
+       ],
+       "lengths": [
+        72
+       ]
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "human": 0.3251595,
+  "ai": 0.6748405
+ },
+ "scannedDocument": {
+  "totalWords": 10032,
+  "totalExcluded": 0,
+  "scanId": "p3-ai2-1787820416",
+  "actualCredits": 41,
+  "expectedCredits": 41,
+  "creationTime": "2026-08-27T08:47:01.8671743Z"
+ }
+}
