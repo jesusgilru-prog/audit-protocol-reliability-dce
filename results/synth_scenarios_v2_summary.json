@@ -115,5 +115,6 @@
     "n": 3931,
     "overall_accuracy": 0.7674891885016535
   },
-  "majority_class_baseline_accuracy": 0.505125
+  "majority_class_baseline_accuracy": 0.505125,
+  "seed": 20260819
 }
