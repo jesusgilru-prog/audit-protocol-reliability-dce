@@ -100,10 +100,14 @@ def main():
     if not os.path.exists(COMPANION_CSV):
         print(f"companion dataset not available at {COMPANION_CSV}; "
               f"reporting the published-window values only")
-        with open(os.path.join(RESULTS, "companion_overlap.json"), "w") as f:
-            json.dump({"from_published_windows": pub,
-                       "note": "dataset not present; published-window "
-                               "recomputation only"}, f, indent=2)
+        out_path = os.path.join(RESULTS, "companion_overlap.json")
+        if os.path.exists(out_path):
+            print(f"keeping the distributed aggregates in {out_path}")
+        else:
+            with open(out_path, "w") as f:
+                json.dump({"from_published_windows": pub,
+                           "note": "dataset not present; published-window "
+                                   "recomputation only"}, f, indent=2)
         return
     d = pd.read_csv(COMPANION_CSV).dropna(subset=["Re_Omega", "Cp"])
     d = d.rename(columns={"source": "facility"})

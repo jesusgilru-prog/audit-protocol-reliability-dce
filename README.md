@@ -42,6 +42,18 @@ to reproduce any result here.
   observable statistics only (see manuscript Method).
 - `code/practical_guideline.py`, `code/threshold_sensitivity.py` —
   secondary analyses reported in Results.
+- `code/effect_size_calibration.py` — fourth pass (12,000 scenarios): a
+  paired design that runs all four confounding mechanisms at identical design
+  points with the effect size matched by construction, where the effect size
+  is the systematic structure the fitted model cannot absorb, in units of
+  noise. This is the pass that qualifies the second pass's ordering of
+  mechanisms.
+- `code/effect_size_altnorm.py` — sensitivity check on how the contaminated
+  mechanism is normalised in that comparison.
+- `code/make_figure_effect_size.py` — the fourth pass's figure.
+- `code/verify_manuscript_numbers.py` — checks every number the manuscript
+  reports for the fourth pass against the result files; exits non-zero on any
+  mismatch.
 - `code/make_figures.py` — regenerates all manuscript figures from
   `results/`.
 - `results/` — all raw scenario tables (`*.csv`) and summary statistics
@@ -53,8 +65,9 @@ to reproduce any result here.
 
 All scenario generation uses fixed random seeds, hardcoded as
 `RNG_SEED` at the top of each generation script and reported in the
-corresponding summary JSON: `20260818` for the first and second passes
-and the meta-models, `20260825` for the third pass. Requires Python 3.12
+corresponding summary JSON: `20260818` for the first pass and the meta-models, `20260819` for the second
+(the base seed plus one), `20260825` for the third and `20260922` for the
+fourth. Requires Python 3.12
 with `numpy`, `pandas`, `scikit-learn`, `matplotlib`.
 
 ```

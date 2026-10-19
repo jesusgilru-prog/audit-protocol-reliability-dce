@@ -1,0 +1,61 @@
+{
+  "what": "outlier-contaminated mechanism, effect size normalised by the base sigma instead of the RMS of the contaminated error term",
+  "n": 3000,
+  "pooled_detection_threshold_rule": {
+    "normalised_by_contaminated_rms (main pass)": 0.38,
+    "normalised_by_base_sigma (this check)": 0.275,
+    "gaussian_linear_for_reference": 0.2763333333333333
+  },
+  "pooled_detection_permutation_rule": {
+    "normalised_by_contaminated_rms (main pass)": 0.8266666666666667,
+    "normalised_by_base_sigma (this check)": 0.7156666666666667,
+    "gaussian_linear_for_reference": 0.8203333333333334
+  },
+  "by_delta_bin_threshold_rule": {
+    "<=0.1": {
+      "n": 304,
+      "threshold_rule": 0.006578947368421052,
+      "permutation_rule": 0.0625
+    },
+    "0.1-0.25": {
+      "n": 403,
+      "threshold_rule": 0.0024813895781637717,
+      "permutation_rule": 0.13399503722084366
+    },
+    "0.25-0.5": {
+      "n": 315,
+      "threshold_rule": 0.0,
+      "permutation_rule": 0.4507936507936508
+    },
+    "0.5-1": {
+      "n": 313,
+      "threshold_rule": 0.006389776357827476,
+      "permutation_rule": 0.8913738019169329
+    },
+    "1-2": {
+      "n": 349,
+      "threshold_rule": 0.04297994269340974,
+      "permutation_rule": 0.9684813753581661
+    },
+    "2-4": {
+      "n": 307,
+      "threshold_rule": 0.13355048859934854,
+      "permutation_rule": 0.996742671009772
+    },
+    "4-8": {
+      "n": 287,
+      "threshold_rule": 0.4564459930313589,
+      "permutation_rule": 1.0
+    },
+    "8-16": {
+      "n": 293,
+      "threshold_rule": 0.7713310580204779,
+      "permutation_rule": 1.0
+    },
+    ">16": {
+      "n": 429,
+      "threshold_rule": 0.9487179487179487,
+      "permutation_rule": 1.0
+    }
+  }
+}

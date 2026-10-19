@@ -22,3 +22,9 @@ BRIEF.md
 # artefactos de escaneo (no forman parte del paper)
 manuscript_for_copyleaks.txt
 results/copyleaks_ai_scan.json
+
+manuscript.fdb_latexmk
+manuscript.fls
+undetectable_brief.md
+results/copyleaks_ai_scan2.json
+code/humanize_undetectable.py

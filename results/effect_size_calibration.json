@@ -1,0 +1,570 @@
+{
+  "seed": 20260922,
+  "n_scenarios": 12000,
+  "n_per_type": 3000,
+  "arm": "confounded only (ground truth = not universal)",
+  "effect_size_definition": "RMS of the true mean's residual after projection on the pooled design span [1, log_re, log_pg], divided by the RMS of the scenario's error term",
+  "delta_distribution_by_mechanism": {
+    "clustered": {
+      "median": 1.35502064544067,
+      "q25": 0.2733612595159662,
+      "q75": 7.447088223052856,
+      "min": 0.050324571835849645,
+      "max": 39.9748767935363
+    },
+    "gaussian_linear": {
+      "median": 1.35502064544067,
+      "q25": 0.27336125951596624,
+      "q75": 7.447088223052855,
+      "min": 0.05032457183584974,
+      "max": 39.97487679353631
+    },
+    "nonlinear_misspecified": {
+      "median": 1.3550206454406697,
+      "q25": 0.2733612595159663,
+      "q75": 7.447088223052858,
+      "min": 0.050324571835849784,
+      "max": 39.97487679353631
+    },
+    "outlier_contaminated": {
+      "median": 1.3550206454406697,
+      "q25": 0.27336125951596624,
+      "q75": 7.447088223052858,
+      "min": 0.05032457183584976,
+      "max": 39.97487679353631
+    }
+  },
+  "detection_by_delta_bin": {
+    "<=0.1": {
+      "gaussian_linear": {
+        "n": 304,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          0.0,
+          0.012479145118788362
+        ],
+        "permutation_rule": 0.125,
+        "permutation_rule_ci95": [
+          0.09243983655149375,
+          0.16691952228759754
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 304,
+        "threshold_rule": 0.006578947368421052,
+        "threshold_rule_ci95": [
+          0.001806004811777884,
+          0.023666835765973785
+        ],
+        "permutation_rule": 0.10855263157894737,
+        "permutation_rule_ci95": [
+          0.07834544711515747,
+          0.14852967307652554
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 304,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          0.0,
+          0.012479145118788362
+        ],
+        "permutation_rule": 0.08223684210526316,
+        "permutation_rule_ci95": [
+          0.056320937291239166,
+          0.11857940106459061
+        ]
+      },
+      "clustered": {
+        "n": 304,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          0.0,
+          0.012479145118788362
+        ],
+        "permutation_rule": 0.15460526315789475,
+        "permutation_rule_ci95": [
+          0.11829981676022665,
+          0.19953117164419956
+        ]
+      }
+    },
+    "0.1-0.25": {
+      "gaussian_linear": {
+        "n": 403,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          -8.59171678631995e-19,
+          0.009442495556010006
+        ],
+        "permutation_rule": 0.46898263027295284,
+        "permutation_rule_ci95": [
+          0.42078195270962593,
+          0.5177690705878933
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 403,
+        "threshold_rule": 0.0024813895781637717,
+        "threshold_rule_ci95": [
+          0.00043814929376014016,
+          0.013920264398448326
+        ],
+        "permutation_rule": 0.5037220843672456,
+        "permutation_rule_ci95": [
+          0.4551020200705256,
+          0.552271857133772
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 403,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          -8.59171678631995e-19,
+          0.009442495556010006
+        ],
+        "permutation_rule": 0.2655086848635236,
+        "permutation_rule_ci95": [
+          0.22475404488465062,
+          0.3106916912445948
+        ]
+      },
+      "clustered": {
+        "n": 403,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          -8.59171678631995e-19,
+          0.009442495556010006
+        ],
+        "permutation_rule": 0.5161290322580645,
+        "permutation_rule_ci95": [
+          0.46741552865141345,
+          0.5645379392338764
+        ]
+      }
+    },
+    "0.25-0.5": {
+      "gaussian_linear": {
+        "n": 315,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          0.0,
+          0.012048615989883377
+        ],
+        "permutation_rule": 0.8571428571428571,
+        "permutation_rule_ci95": [
+          0.8141893310240553,
+          0.8914902289831708
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 315,
+        "threshold_rule": 0.012698412698412698,
+        "threshold_rule_ci95": [
+          0.004948865582647187,
+          0.032190579207493124
+        ],
+        "permutation_rule": 0.8666666666666667,
+        "permutation_rule_ci95": [
+          0.8246748910546887,
+          0.8998227905527302
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 315,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          0.0,
+          0.012048615989883377
+        ],
+        "permutation_rule": 0.6507936507936508,
+        "permutation_rule_ci95": [
+          0.5966176058651225,
+          0.7013359861379286
+        ]
+      },
+      "clustered": {
+        "n": 315,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          0.0,
+          0.012048615989883377
+        ],
+        "permutation_rule": 0.8761904761904762,
+        "permutation_rule_ci95": [
+          0.8352218365346167,
+          0.9080939666729948
+        ]
+      }
+    },
+    "0.5-1": {
+      "gaussian_linear": {
+        "n": 313,
+        "threshold_rule": 0.006389776357827476,
+        "threshold_rule_ci95": [
+          0.0017540229665585925,
+          0.022995252381123023
+        ],
+        "permutation_rule": 0.9808306709265175,
+        "permutation_rule_ci95": [
+          0.9588157545546195,
+          0.9911857603979625
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 313,
+        "threshold_rule": 0.038338658146964855,
+        "threshold_rule_ci95": [
+          0.02206484370174629,
+          0.06580745589527633
+        ],
+        "permutation_rule": 0.9968051118210862,
+        "permutation_rule_ci95": [
+          0.982127211577234,
+          0.9994358155000185
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 313,
+        "threshold_rule": 0.0,
+        "threshold_rule_ci95": [
+          -8.568452627128834e-19,
+          0.012124670497813418
+        ],
+        "permutation_rule": 0.8690095846645367,
+        "permutation_rule_ci95": [
+          0.827116320922819,
+          0.9019546091570695
+        ]
+      },
+      "clustered": {
+        "n": 313,
+        "threshold_rule": 0.009584664536741214,
+        "threshold_rule_ci95": [
+          0.0032648420563690236,
+          0.027796735716246697
+        ],
+        "permutation_rule": 0.9776357827476039,
+        "permutation_rule_ci95": [
+          0.9545636272215383,
+          0.9891255853061095
+        ]
+      }
+    },
+    "1-2": {
+      "gaussian_linear": {
+        "n": 349,
+        "threshold_rule": 0.025787965616045846,
+        "threshold_rule_ci95": [
+          0.013625132963523943,
+          0.04827686498683111
+        ],
+        "permutation_rule": 0.9885386819484241,
+        "permutation_rule_ci95": [
+          0.9709051205284709,
+          0.9955342108882328
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 349,
+        "threshold_rule": 0.18624641833810887,
+        "threshold_rule_ci95": [
+          0.14889750270958985,
+          0.23042738415182323
+        ],
+        "permutation_rule": 0.9885386819484241,
+        "permutation_rule_ci95": [
+          0.9709051205284709,
+          0.9955342108882328
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 349,
+        "threshold_rule": 0.014326647564469915,
+        "threshold_rule_ci95": [
+          0.0061345115171149095,
+          0.03309442293959314
+        ],
+        "permutation_rule": 0.9455587392550143,
+        "permutation_rule_ci95": [
+          0.9165416093683963,
+          0.9648737339471309
+        ]
+      },
+      "clustered": {
+        "n": 349,
+        "threshold_rule": 0.04297994269340974,
+        "threshold_rule_ci95": [
+          0.02621653812085228,
+          0.06969505506997327
+        ],
+        "permutation_rule": 0.994269340974212,
+        "permutation_rule_ci95": [
+          0.9793487929653301,
+          0.9984270701981971
+        ]
+      }
+    },
+    "2-4": {
+      "gaussian_linear": {
+        "n": 307,
+        "threshold_rule": 0.1465798045602606,
+        "threshold_rule_ci95": [
+          0.11138653075626287,
+          0.19050871106465173
+        ],
+        "permutation_rule": 1.0,
+        "permutation_rule_ci95": [
+          0.9876412938293975,
+          1.0
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 307,
+        "threshold_rule": 0.4495114006514658,
+        "threshold_rule_ci95": [
+          0.39483110401539573,
+          0.5054396448161634
+        ],
+        "permutation_rule": 0.996742671009772,
+        "permutation_rule_ci95": [
+          0.9817823639428666,
+          0.9994247846498573
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 307,
+        "threshold_rule": 0.03908794788273615,
+        "threshold_rule_ci95": [
+          0.022498768206253128,
+          0.0670696808044327
+        ],
+        "permutation_rule": 0.9185667752442996,
+        "permutation_rule_ci95": [
+          0.8825520823130684,
+          0.9442355805994891
+        ]
+      },
+      "clustered": {
+        "n": 307,
+        "threshold_rule": 0.14332247557003258,
+        "threshold_rule_ci95": [
+          0.10852790575679781,
+          0.18693319082744317
+        ],
+        "permutation_rule": 1.0,
+        "permutation_rule_ci95": [
+          0.9876412938293975,
+          1.0
+        ]
+      }
+    },
+    "4-8": {
+      "gaussian_linear": {
+        "n": 287,
+        "threshold_rule": 0.4738675958188153,
+        "threshold_rule_ci95": [
+          0.4168260086292889,
+          0.5315995260947671
+        ],
+        "permutation_rule": 1.0,
+        "permutation_rule_ci95": [
+          0.9867914356130623,
+          1.0
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 287,
+        "threshold_rule": 0.7804878048780488,
+        "threshold_rule_ci95": [
+          0.7290681424583615,
+          0.824497784836771
+        ],
+        "permutation_rule": 1.0,
+        "permutation_rule_ci95": [
+          0.9867914356130623,
+          1.0
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 287,
+        "threshold_rule": 0.23693379790940766,
+        "threshold_rule_ci95": [
+          0.1914173865690125,
+          0.2893996629864844
+        ],
+        "permutation_rule": 0.9477351916376306,
+        "permutation_rule_ci95": [
+          0.9155679267780118,
+          0.9680745782831625
+        ]
+      },
+      "clustered": {
+        "n": 287,
+        "threshold_rule": 0.37282229965156793,
+        "threshold_rule_ci95": [
+          0.31890244556210123,
+          0.4301018234283046
+        ],
+        "permutation_rule": 1.0,
+        "permutation_rule_ci95": [
+          0.9867914356130623,
+          1.0
+        ]
+      }
+    },
+    "8-16": {
+      "gaussian_linear": {
+        "n": 293,
+        "threshold_rule": 0.7815699658703071,
+        "threshold_rule_ci95": [
+          0.730781078577364,
+          0.8250709313835041
+        ],
+        "permutation_rule": 0.9965870307167235,
+        "permutation_rule_ci95": [
+          0.9809235292144232,
+          0.9993972883529258
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 293,
+        "threshold_rule": 0.9146757679180887,
+        "threshold_rule_ci95": [
+          0.8770785864980039,
+          0.9415398281716382
+        ],
+        "permutation_rule": 0.9965870307167235,
+        "permutation_rule_ci95": [
+          0.9809235292144232,
+          0.9993972883529258
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 293,
+        "threshold_rule": 0.6791808873720137,
+        "threshold_rule_ci95": [
+          0.6237087053151378,
+          0.7300153010235965
+        ],
+        "permutation_rule": 0.9692832764505119,
+        "permutation_rule_ci95": [
+          0.9426625756654233,
+          0.9837574409360235
+        ]
+      },
+      "clustered": {
+        "n": 293,
+        "threshold_rule": 0.6313993174061433,
+        "threshold_rule_ci95": [
+          0.5747912362834798,
+          0.6846063683649252
+        ],
+        "permutation_rule": 0.9897610921501706,
+        "permutation_rule_ci95": [
+          0.9703336997368961,
+          0.9965119175889774
+        ]
+      }
+    },
+    ">16": {
+      "gaussian_linear": {
+        "n": 429,
+        "threshold_rule": 0.951048951048951,
+        "threshold_rule_ci95": [
+          0.9263282775914217,
+          0.9677632330212366
+        ],
+        "permutation_rule": 0.993006993006993,
+        "permutation_rule_ci95": [
+          0.97964381650848,
+          0.9976189974169838
+        ]
+      },
+      "outlier_contaminated": {
+        "n": 429,
+        "threshold_rule": 0.993006993006993,
+        "threshold_rule_ci95": [
+          0.97964381650848,
+          0.9976189974169838
+        ],
+        "permutation_rule": 1.0,
+        "permutation_rule_ci95": [
+          0.9911246978109313,
+          1.0
+        ]
+      },
+      "nonlinear_misspecified": {
+        "n": 429,
+        "threshold_rule": 0.9067599067599068,
+        "threshold_rule_ci95": [
+          0.8755199579396377,
+          0.9307796213983928
+        ],
+        "permutation_rule": 0.951048951048951,
+        "permutation_rule_ci95": [
+          0.9263282775914217,
+          0.9677632330212366
+        ]
+      },
+      "clustered": {
+        "n": 429,
+        "threshold_rule": 0.8135198135198135,
+        "threshold_rule_ci95": [
+          0.7739381355349046,
+          0.8475363253302247
+        ],
+        "permutation_rule": 0.9953379953379954,
+        "permutation_rule_ci95": [
+          0.9831628373242909,
+          0.9987206045629954
+        ]
+      }
+    }
+  },
+  "pooled_detection": {
+    "clustered": {
+      "n": 3000,
+      "threshold_rule": 0.23433333333333334,
+      "permutation_rule": 0.8316666666666667
+    },
+    "gaussian_linear": {
+      "n": 3000,
+      "threshold_rule": 0.2763333333333333,
+      "permutation_rule": 0.8203333333333334
+    },
+    "nonlinear_misspecified": {
+      "n": 3000,
+      "threshold_rule": 0.22433333333333333,
+      "permutation_rule": 0.7283333333333334
+    },
+    "outlier_contaminated": {
+      "n": 3000,
+      "threshold_rule": 0.38,
+      "permutation_rule": 0.8266666666666667
+    }
+  },
+  "paired_vs_gaussian_linear": {
+    "outlier_contaminated": {
+      "n_pairs": 3000,
+      "gaussian_detects_other_misses": 4,
+      "other_detects_gaussian_misses": 315,
+      "difference_in_detection_rate": 0.10366666666666668,
+      "mcnemar_exact_p": 8.030246509714824e-88
+    },
+    "nonlinear_misspecified": {
+      "n_pairs": 3000,
+      "gaussian_detects_other_misses": 158,
+      "other_detects_gaussian_misses": 2,
+      "difference_in_detection_rate": -0.05199999999999999,
+      "mcnemar_exact_p": 1.7627075702117157e-44
+    },
+    "clustered": {
+      "n_pairs": 3000,
+      "gaussian_detects_other_misses": 178,
+      "other_detects_gaussian_misses": 52,
+      "difference_in_detection_rate": -0.04199999999999998,
+      "mcnemar_exact_p": 2.5103312743326237e-17
+    }
+  }
+}
