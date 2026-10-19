@@ -195,7 +195,7 @@ def fig_decision():
     arrow(4.3, 2.85, 2.3, 2.1)
     arrow(5.7, 2.85, 7.6, 2.1)
 
-    ax.text(2.3, .45, "calibration only approximately nominal\nwhen $m_{\\min}$ is 1 or 2",
+    ax.text(2.3, .45, "false alarms 8.1% pooled (not 5%);\n10.7% at 5-9 points. Heuristic only",
             ha="center", fontsize=7.4, color="#4b5563", style="italic")
     ax.text(7.65, .45, "a stratified test loses ~39 points\nof power in this regime",
             ha="center", fontsize=7.4, color="#4b5563", style="italic")
